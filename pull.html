@@ -1,0 +1,70 @@
+<script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="underscore-min.js"></script>
+<script type="text/javascript" src="std.js"></script>
+<script type="text/javascript" src="pullSim.js"></script>
+<h2>Pull Algorithms</h2>
+<p>When designing a game that revolves around getting collectibles of some kind through a random pull, it’s hard to actually visualize how that algorithm is going to play out. As it is difficult to fully grasp the consequences of these random distributions it is difficult to design these systems perfectly. Over the course of this article, I’m going to present a bunch of small simulations to help understand various algorithms.</p>
+<h3>Table of Contents</h3>
+<p><ul>
+    <li><a href="#chap1">Basic Player Engagement</a><ul>
+        <li><a href="#chap1a">Stimulation</a></li>
+        <li><a href="#chap1b">On The Simplifications of the Article</a></li>
+        <li><a href="#chap1c">Different Things Are Differently Engaging</a></li>
+    </ul></li>
+    <li><a href="#chap2">Systems of Engagement</a></li>
+    <li><a href="#chap3">Pull Systems</a></li>
+    <li><a href="#chap4">Pokemon Go</a></li>
+    <li><a href="#chap5">Introducing New Content</a></li>
+    <li><a href="#chap6">Placing a Ceiling on Bad Pulls</a></li>
+    <li><a href="#chap7">Pokemon Red and Blue</a></li>
+    <li><a href="#conclusion">Conclusion</a></li>
+</ul></p>
+<h3><a name="chap1">Basic Player Engagement</a></h3>
+<h4><a name="chap1a">Stimulation</a></h4>
+<p>This is our first simulation and it’s pretty simple. Just click on the players to engage them. Different players require different amounts of engagement. If a player receives too little stimulation, they will get bored and leave. If they receive too much, they will be overstimulated and will leave.</p>
+<canvas id="sim1" width="640px" height="480px" align="center"></canvas>
+<h4><a name="chap1b">On The Simplifications of the Article</a></h4>
+<p>This is an obvious and gross simplification of player retention. I can see at least the following false assumptions:<ul>
+    <li><b>Players retain as long as they are engaged</b> - This just is not something that you can guarantee. Players will leave sometimes even if they are still having fun with your game. They only have so much time in a day.</li>
+    <li><b>Players need a baseline of engagement</b> - I personally have stuck with games that I’ve found less than engaging for a variety of reasons. Sometimes, that’s just the right game for the moment.</li>
+</ul></p>
+<p>I’m going to add another assumption to this list, <b>a game that keeps players engaged is more likely to keep players</b>. I don’t actually have any proof of this, but it seems reasonable enough to make and lets us ignore the falsity of the previous assumptions as irrelevant. Essentially, while an individual person is likely to be a lot less predictable than the person we are simulating, optimizing for this simulated person will also optimize for your player base as a whole.</p>
+<p>Remember though that this is a simplification aimed to help you think about a single axis. A new feature could do well in this simulation, but still be bad for your game due to something that this article doesn’t cover, such as negatively impacting the decision making in the game or increasing complexity to the point of impenetrability. Video games are complex and need to be looked at with multiple lenses.</p>
+<h4><a name="chap1c">Different Things Are Differently Engaging</a></h4>
+<p>Now, let’s try the earlier simulation with a variety of things to engage the player with.</p>
+<h3><a name="chap2">Systems of Engagement</a></h3>
+<p>A common game development pattern is to use a system to drive the player’s engagement instead of hand-crafting it in the manner of the above simulations. It’s often time consuming and expensive to keep clicking on a player. So, with this simulation, we’re going to go over a basic system to do that for us.</p>
+<h3><a name="chap3">Pull Systems</a></h3>
+<p>This article is actually only going to focus on one specific kind of engagement system. We’re going to look at a couple of pull algorithms, or algorithms for giving players pieces in a random or semi-random way.</p>
+<p>The impetus for this piece came from watching Pokemon Go release the second generation of Pokemon into the wild, so we’re going to use that game as the primary example for the rest of the piece. In particular, we’re going to look at the way players randomly encounter new Pokemon to catch, and consider that a pull system. We’re going to start with the most abstract representation, where we’ll just assume that all of the pieces are of equal value and we’ll assume 100 of them.</p>
+<p>We’re making a few assumptions at this point, and they are at best only partially true. These are:<ul>
+    <li><b>Getting things is equivalent to being engaged</b> - This is a hard one to make definitive statements about. I think that getting things is a piece of the puzzle that is engagement, but not the full thing. Its importance changes greatly depending on the kind of game and the consequences of getting a new piece. I personally feel that players need to feel like they are getting value for their time and when a game revolves around collection, this means that they need to collect something meaningful occasionally.</li>
+    <li><b>Potential value of a pull is meaningless</b> - ie; players don't care about what they can get, they care about what they did get. This is clearly false. When players have things that they are excited to get, then they are naturally more excited about the chance to get those things. However, that is a layer of complexity too far for these simulations, so the calculation of those effects are left as an exercise for the reader. However, this excitement is a major part of the player experience and you should keep it in mind when designing your own systems.</li>
+    <li><b>Pull rate is constant</b> - Again, this is just to keep this article simple. In the real world, the rate can be as complex as you want it to be.</li>
+</ul></p>
+<h3><a name="chap4">Pokemon Go</a></h3>
+<p>Let’s get a little deeper into what a real pull system looks like. Taking Pokemon Go itself, different Pokemon are differently valuable due to the following axes:<ul>
+    <li><b>Intrinsic Value</b> - Pokemon have value to players beyond that of simple gameplay. People who like puppies are probably going to like Growlithes no matter what the stats are.</li>
+    <li><b>Not having caught it before</b> - This is a collection game and you want to Catch ‘Em All, so getting a Pokemon that you have not caught before is naturally going to be a major reward moment for most players.</li>
+    <li><b>Evolution</b> - This is similar to the previous one, if of lower intensity. Being able to convert a piece into one that you have yet to get is valuable to players.</li>
+    <li><b>Combat value</b> - Getting a Pokemon that is stronger than the ones you already have or that is able to power up a major member of your team is valuable to players.</li>
+</ul></p>
+<p>Note that:<ul>
+    <li>This simulation does not use the actual Pokemon data, just a fascimile of it.</li>
+    <li>At this level of abstraction, this data can represent a lot of games, not just Pokemon Go.</li>
+</ul></p>
+<h3><a name="chap5">Introducing New Content</a></h3>
+<p>Pokemon Go, when introducing the second generation, just added more pieces to their existing pulls. Releasing like that when your players have already performed a large number of pulls results in a graph that looks something like the below one.</p>
+sim
+<p>For comparison, just changing the entire pool of pulls to only be the new set looks more like this:</p>
+sim
+<h3><a name="chap6">Placing a Ceiling on Bad Pulls</a></h3>
+<p>A common approach to smooth out the variance of a pull system is to place a ceiling on the number of low-value pulls. That results in graphs that look like this:</p>
+<p>On a personal note, I dislike it when games do this without communicating the skew to the player because I feel it reinforces the Gambler’s Fallacy. I also feel that making the cap more explicit is a better experience for the player as the player doesn’t feel like bad pulls help them get to good pulls when it is implicit.</p>
+<h3><a name="chap7">Pokemon Red and Blue</a></h3>
+<p>Another option is to divide your pool of pulls across a lot of smaller pools and then let the player move between them. This is essentially what <i>Pokemon Red</i> did and also what a game like <i>Heroes Charge</i> does as well. This changes the flow to be much wavier, and so the graph looks more like this:</p>
+<p>Of course, there are a lot of ways to implement a division like this and the amount of effort required is dependent on the kind of separation that you want to make.</p>
+<h3><a name="conclusion">Conclusion</a></h3>
+<p>This is, of course, a very incomplete taxonomy. Hopefully though, it lets you think about how players interact with the pull systems that you have made and the potential problems and benefits of these solutions.</p>
+<p>You can look through the source code here - </p>
+<p>If you have any feedback on this or if you want to see more things like this, you can reach me on Twitter at <a href="">@murthynikhil</a>. If you make any new simulations like this, please do tell me. I’d love to see more explanations like this. Also, if you want to support this work, you can do so here - [patreon]</p>
