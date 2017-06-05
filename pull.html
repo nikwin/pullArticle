@@ -35,8 +35,26 @@
 <p>Remember though that this is a simplification aimed to help you think about a single axis. A new feature could do well in this simulation, but still be bad for your game due to something that this article doesn’t cover, such as negatively impacting the decision making in the game or increasing complexity to the point of impenetrability. Video games are complex and need to be looked at with multiple lenses.</p>
 <h4><a name="chap1c">Different Things Are Differently Engaging</a></h4>
 <p>Now, let’s try the earlier simulation with a variety of things to engage the player with.</p>
+<table><tr>
+    <td><canvas id="sim1c" width="480px" height="320px" align="center"></canvas></td>
+    <td>
+      <button id="sim1cInter1">Interact!</button>
+      <br />
+      <button id="sim1cInter2">Interact!</button>
+</td></tr></table>
 <h3><a name="chap2">Systems of Engagement</a></h3>
 <p>A common game development pattern is to use a system to drive the player’s engagement instead of hand-crafting it in the manner of the above simulations. It’s often time consuming and expensive to keep clicking on a player. So, with this simulation, we’re going to go over a basic system to do that for us.</p>
+<table><tr>
+    <td>
+      <table>
+      <tr><td><canvas id="sim2" width="480px" height="320px" align="center"></canvas></tr></td>
+      <tr><td><canvas id="graph2" width="480px" height="320px" align="center"></canvas></tr></td>
+      </table>
+    </td>
+    <td>
+      <p>Engagemement per second</p>
+      <input id="input2" type="range" min="0" max="30" value="0">
+</td></tr></table>
 <h3><a name="chap3">Pull Systems</a></h3>
 <p>This article is actually only going to focus on one specific kind of engagement system. We’re going to look at a couple of pull algorithms, or algorithms for giving players pieces in a random or semi-random way.</p>
 <p>The impetus for this piece came from watching Pokemon Go release the second generation of Pokemon into the wild, so we’re going to use that game as the primary example for the rest of the piece. In particular, we’re going to look at the way players randomly encounter new Pokemon to catch, and consider that a pull system. We’re going to start with the most abstract representation, where we’ll just assume that all of the pieces are of equal value and we’ll assume 100 of them.</p>
