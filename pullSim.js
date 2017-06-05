@@ -1,12 +1,15 @@
-var width = 640;
-var height = 480;
+var width = 480;
+var height = 320;
+
+var PERSON_WIDTH = 75;
+var PERSON_HEIGHT = 150;
 
 var Person = function(){
     this.engaged = 0;
     this.boredomFactor = 0.5 + Math.random() * 1;
     this.engagePerClick = 1;
     this.effects = [];
-    this.rect = [width / 2 - 75, height / 2 - 150, 150, 300];
+    this.rect = [(width - PERSON_WIDTH) / 2, (height - PERSON_HEIGHT) / 2, PERSON_WIDTH, PERSON_HEIGHT];
 };
 
 Person.prototype.checkLeave = function(){
@@ -40,7 +43,8 @@ EnteringPerson.prototype.update = function(interval){
 };
 
 EnteringPerson.prototype.draw = function(ctx){
-    ctx.drawImage(getImage('person'), width / 2 - 75, height / 2 - 150 + ((height / 2 + 150) * this.timeToAnimation));
+    ctx.drawImage(getImage('person'), (width - PERSON_WIDTH) / 2, 
+                  (height - PERSON_HEIGHT) / 2 + ((height + PERSON_HEIGHT) / 2 * this.timeToAnimation));
 };
 
 var LeavingPerson = function(){
@@ -53,7 +57,8 @@ LeavingPerson.prototype.update = function(interval){
 };
 
 LeavingPerson.prototype.draw = function(ctx){
-    ctx.drawImage(getImage('person'), width / 2 - 75, height / 2 - 150 + ((height / 2 + 150) * (1 - this.timeToAnimation)));
+    ctx.drawImage(getImage('person'), (width - PERSON_WIDTH) / 2, 
+                  (height - PERSON_HEIGHT) / 2 + ((height + PERSON_HEIGHT) / 2 * (1 - this.timeToAnimation)));
 };
 
 EnteringPerson.prototype.next = Person;
@@ -61,8 +66,9 @@ Person.prototype.next = LeavingPerson;
 LeavingPerson.prototype.next = EnteringPerson;
 
 var Sim1 = function(){
-    this.canvas = document.getElementById('sim1');
+    this.canvas = $('#sim1')[0];
     this.ctx = this.canvas.getContext('2d');
+    $('#sim1Inter1').click(() => this.click());
 };
 
 Sim1.prototype.update = function(interval){
@@ -82,11 +88,10 @@ Sim1.prototype.initialize = function(){
     this.person = new EnteringPerson();
 };
 
-Sim1.prototype.click = function(pos){
+Sim1.prototype.click = function(){
+    console.log('clicked');
     if (this.person.click){
-        if (containsPos(this.person.rect, pos)){
-            this.person.click();
-        }
+        this.person.click();
     }
 };
 
