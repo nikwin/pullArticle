@@ -172,8 +172,14 @@ var Sim2 = function(){
     this.graph = $('#graph2')[0];
     this.graphCtx = this.graph.getContext('2d');
     var that = this;
-    $('#input2').on('change', function(newValue){
-        that.updateFreq($(this).val());
+    this.graphZoom = 1;
+    $('#input2_1').on('change', function(){
+        var val = Number($(this).val());
+        that.updateFreq(val);
+    });
+    $('#input2_2').on('change', function(){
+        var val = Number($(this).val());
+        that.updateZoom(val);
     });
 };
 
@@ -201,7 +207,7 @@ Sim2.prototype.draw = function(){
     var startPos = [0, height * (1 - this.dataPoints[0])];
     this.graphCtx.moveTo(startPos[0], startPos[1]);
     for (var i = 1; i < this.dataPoints.length; i++){
-        var pos = [i * 2, height * (1 - this.dataPoints[i])];
+        var pos = [i * this.graphZoom, height * (1 - this.dataPoints[i])];
         this.graphCtx.lineTo(pos[0], pos[1]);
     }
     this.graphCtx.stroke();
@@ -218,11 +224,16 @@ Sim2.prototype.updateFreq = function(newValue){
     this.calculateGraph();
 };
 
+Sim2.prototype.updateZoom = function(newValue){
+    this.graphZoom = newValue;
+    this.calculateGraph();
+};
+
 Sim2.prototype.calculateGraph = function(){
     var people = _.map(_.range(GRAPH_COUNT), () => new Person());
     var system = new Sim2System(this.system.eps);
     this.dataPoints = [];
-    for (var i = 0; i < width; i += 2){
+    for (var i = 0; i < width; i+=this.graphZoom){
         for (var j = 0; j < 10; j++){
             people = _.filter(people, (person) => person.update(0.1));
             system.update(people, 0.1);
