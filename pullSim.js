@@ -4,6 +4,10 @@ var height = 320;
 var PERSON_WIDTH = 75;
 var PERSON_HEIGHT = 150;
 
+var EFFECT_WIDTH = 32;
+var EFFECT_HEIGHT = 32;
+
+
 var Person = function(){
     this.engaged = 0;
     this.boredomFactor = 0.5 + Math.random() * 1;
@@ -24,13 +28,34 @@ Person.prototype.update = function(interval){
 
 Person.prototype.click = function(){
     this.engaged += this.engagePerClick;
-    //Also add an effect here.
+    this.effects.push(new SmileEffect());
 };
 
 Person.prototype.draw = function(ctx){
+    ctx.fillStyle = '#330000';
+    ctx.fillRect(0, 10, width, 40);
+
+    var indicatorX = width * (this.engaged + 5) / 10;
+
+    ctx.drawImage(getImage('smiley'), indicatorX, 14);
+    
     var image = getImage('person');
     ctx.drawImage(image, this.rect[0], this.rect[1]);
     _.each(this.effects, effect => effect.draw(ctx));
+};
+
+var SmileEffect = function(){
+    this.rect = [(width - EFFECT_WIDTH) / 2, (height - PERSON_HEIGHT) / 2, EFFECT_WIDTH, EFFECT_HEIGHT];
+};
+
+SmileEffect.prototype.update = function(interval){
+    this.rect[1] -= 100 * interval;
+    return (this.rect[1] + this.rect[3]) > 0;
+};
+
+SmileEffect.prototype.draw = function(ctx){
+    var image = getImage('smiley');
+    ctx.drawImage(image, this.rect[0], this.rect[1]);
 };
 
 var EnteringPerson = function(){
