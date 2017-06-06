@@ -86,6 +86,8 @@ FirstEngagementComponent.prototype.addEngagement = function(engagement){
     return engagement;
 };
 
+FirstEngagementComponent.prototype.deathData = falseFunction;
+
 var EnteringPerson = function(){
     this.timeToAnimation = 1;
 };
@@ -270,9 +272,7 @@ Sim2.prototype.calculateGraph = function(){
                     return true;
                 }
                 else{
-                    if (person.engagementComponent.deathData){
-                        this.individualData.push(person.engagementComponent.deathData());
-                    }
+                    this.individualData.push(person.engagementComponent.deathData());
                     return false;
                 }
             });
@@ -280,6 +280,8 @@ Sim2.prototype.calculateGraph = function(){
         }
         this.dataPoints.push(people.length / GRAPH_COUNT);
     }
+
+    _.each(people, (person) => this.individualData.push(person.engagementComponent.deathData()));
     this.calculateData();
 };
 
@@ -329,7 +331,7 @@ var Sim3System = function(eps, entityCount){
     this.eps = eps;
     
     this.timeToEngage = 1;
-    this.entityCount = 100;
+    this.entityCount = entityCount;
 };
 
 Sim3System.prototype.update = Sim2System.prototype.update;
