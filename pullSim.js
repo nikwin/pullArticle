@@ -9,26 +9,22 @@ var EFFECT_HEIGHT = 32;
 
 var GRAPH_COUNT = 1000;
 
-var Person = function(){
-    this.engaged = 0;
-    this.boredomFactor = 0.5 + Math.random() * 1;
+var Person = function(personData){
+    this.engagementComponent = personData.getEngagementComponent();
     this.effects = [];
     this.rect = [(width - PERSON_WIDTH) / 2, (height - PERSON_HEIGHT) / 2, PERSON_WIDTH, PERSON_HEIGHT];
 };
 
-Person.prototype.checkLeave = function(){
-    return (this.engaged > -5) && (this.engaged < 5);
-};
-
 Person.prototype.update = function(interval){
-    this.engaged -= interval * this.boredomFactor;
+    this.engagementComponent.update(interval);
     this.effects = _.filter(this.effects, effect => effect.update(interval));
-    return this.checkLeave();
+    return this.engagementComponent.checkLeave();
 };
 
 Person.prototype.addEngagement = function(engagement){
-    this.engaged += engagement;
-    for (var i = 0; i < engagement; i += 0.2){
+    var effectCount = this.engagementComponent.addEngagement(engagement);
+    
+    for (var i = 0; i < effectCount; i++){
         this.effects.push(new SmileEffect());
     }
 };
@@ -42,7 +38,7 @@ Person.prototype.draw = function(ctx){
     ctx.fillStyle = '#330000';
     ctx.fillRect(0, 10, width, 40);
 
-    var indicatorX = width * (this.engaged + 5) / 10;
+    var indicatorX = width * (this.engagementComponent.engaged + 5) / 10;
 
     ctx.drawImage(getImage('smiley'), indicatorX, 14);
     
@@ -50,6 +46,11 @@ Person.prototype.draw = function(ctx){
     ctx.drawImage(image, this.rect[0], this.rect[1]);
     _.each(this.effects, effect => effect.draw(ctx));
 };
+
+var FirstPersonData = function(){};
+
+FirstPersonData.prototype.getEngagementComponent = function(){ return new FirstEngagementComponent(); };
+
 
 var SmileEffect = function(){
     this.rect = [(width - EFFECT_WIDTH) / 2 + (Math.random() - 0.5) * EFFECT_WIDTH, 
@@ -65,6 +66,24 @@ SmileEffect.prototype.update = function(interval){
 SmileEffect.prototype.draw = function(ctx){
     var image = getImage('smiley');
     ctx.drawImage(image, this.rect[0], this.rect[1]);
+};
+
+var FirstEngagementComponent = function(){
+    this.engaged = 0;
+    this.boredomFactor = 0.5 + Math.random() * 1;
+};
+
+FirstEngagementComponent.prototype.checkLeave = function(){
+    return (this.engaged > -5) && (this.engaged < 5);
+};
+
+FirstEngagementComponent.prototype.update = function(interval){
+    this.engaged -= interval * this.boredomFactor;
+};
+
+FirstEngagementComponent.prototype.addEngagement = function(engagement){
+    this.engaged += engagement;
+    return engagement;
 };
 
 var EnteringPerson = function(){
@@ -107,7 +126,7 @@ var Sim1 = function(){
 
 Sim1.prototype.update = function(interval){
     if (!this.person.update(interval)){
-        this.person = new this.person.next();
+        this.person = new this.person.next(this.personData);
     }
     return true;
 };
@@ -119,6 +138,7 @@ Sim1.prototype.draw = function(){
 };
 
 Sim1.prototype.initialize = function(){
+    this.personData = new FirstPersonData();
     this.person = new EnteringPerson();
 };
 
@@ -141,15 +161,16 @@ Sim1c.prototype.draw = Sim1.prototype.draw;
 
 Sim1c.prototype.initialize = function(){
     this.person = new EnteringPerson();
-    this.click2Engagment = 5;
+    this.personData = new FirstPersonData();
+    this.click2Engagement = 5;
 };
 
 Sim1c.prototype.click1 = Sim1.prototype.click;
 
 Sim1c.prototype.click2 = function(){
     if (this.person.addEngagement){
-        this.person.addEngagement(this.click2Engagment);
-        this.click2Engagment = max(this.click2Engagment - 0.5, 0);
+        this.person.addEngagement(this.click2Engagement);
+        this.click2Engagement = max(this.click2Engagement - 0.5, 0);
     }
 };
 
@@ -161,9 +182,18 @@ var Sim2System = function(eps){
 Sim2System.prototype.update = function(people, interval){
     this.timeToEngage -= interval * this.eps / 10;
     if (this.timeToEngage < 0){
-        _.each(people, (person) => person.addEngagement(1));
+        _.each(people, (person) => this.engage(person));
         this.timeToEngage = 1;
     }
+};
+
+Sim2System.prototype.engage = function(person){ person.addEngagement(1); };
+
+var makeChangeFunction = function(fn){
+    return function(){
+        var val = Number($(this).val());
+        fn(val);
+    };
 };
 
 var Sim2 = function(){
@@ -173,19 +203,14 @@ var Sim2 = function(){
     this.graphCtx = this.graph.getContext('2d');
     var that = this;
     this.graphZoom = 1;
-    $('#input2_1').on('change', function(){
-        var val = Number($(this).val());
-        that.updateFreq(val);
-    });
-    $('#input2_2').on('change', function(){
-        var val = Number($(this).val());
-        that.updateZoom(val);
-    });
+    
+    $('#input2_1').on('change', makeChangeFunction((val) => this.updateFreq(val)));
+    $('#input2_2').on('change', makeChangeFunction((val) => this.updateZoom(val)));
 };
 
 Sim2.prototype.update = function(interval){
     if (!this.person.update(interval)){
-        this.person = new this.person.next();
+        this.person = new this.person.next(this.personData);
     }
 
     if (this.person.addEngagement){
@@ -215,9 +240,13 @@ Sim2.prototype.draw = function(){
 
 Sim2.prototype.initialize = function(){
     this.person = new EnteringPerson();
-    this.system = new Sim2System(0);
+    this.personData = new FirstPersonData();
+    this.system = this.getSystem();
     this.updateFreq(0);
 };
+
+Sim2.prototype.getSystem = function(){ return new Sim2System(0); };
+Sim2.prototype.getGraphSystem =function(){ return new Sim2System(this.system.eps); };
 
 Sim2.prototype.updateFreq = function(newValue){
     this.system.eps = newValue;
@@ -230,23 +259,153 @@ Sim2.prototype.updateZoom = function(newValue){
 };
 
 Sim2.prototype.calculateGraph = function(){
-    var people = _.map(_.range(GRAPH_COUNT), () => new Person());
-    var system = new Sim2System(this.system.eps);
+    var people = _.map(_.range(GRAPH_COUNT), () => new Person(this.personData));
+    var system = this.getGraphSystem();
     this.dataPoints = [];
+    this.individualData = [];
     for (var i = 0; i < width; i+=this.graphZoom){
         for (var j = 0; j < 10; j++){
-            people = _.filter(people, (person) => person.update(0.1));
+            people = _.filter(people, (person) => {
+                if (person.update(0.1)){
+                    return true;
+                }
+                else{
+                    if (person.engagementComponent.deathData){
+                        this.individualData.push(person.engagementComponent.deathData());
+                    }
+                    return false;
+                }
+            });
             system.update(people, 0.1);
         }
         this.dataPoints.push(people.length / GRAPH_COUNT);
     }
+    this.calculateData();
+};
+
+Sim2.prototype.calculateData = trueFunction;
+
+var Sim3PersonData = function(){
+    this.newVal = 2;
+    this.oldVal = 0;
+};
+
+Sim3PersonData.prototype.getEngagementComponent = function(){ return new Sim3EngagementComponent(this.newVal, this.oldVal); };
+
+var Sim3EngagementComponent = function(newVal, oldVal){
+    this.newVal = newVal;
+    this.oldVal = oldVal;
+    this.engaged = 0;
+    this.boredomFactor = 0.5 + Math.random() * 1;
+    this.boredomFactor *= 2;
+    this.collectedPieces = {};
+};
+
+Sim3EngagementComponent.prototype.checkLeave = function(){
+    return this.engaged > -5;
+};
+
+Sim3EngagementComponent.prototype.update = FirstEngagementComponent.prototype.update;
+
+Sim3EngagementComponent.prototype.deathData = function(){
+    return {
+        pulls: _.reduce(this.collectedPieces, addFunction, 0),
+        pieceCount: Object.keys(this.collectedPieces).length
+    };
+};
+
+Sim3EngagementComponent.prototype.addEngagement = function(engagement){
+    if (this.collectedPieces[engagement]){
+        this.collectedPieces[engagement] += 1;
+        this.engaged += this.oldVal;
+    }
+    else{
+        this.collectedPieces[engagement] = 1;
+        this.engaged += this.newVal;
+    }
+};
+
+var Sim3System = function(eps, entityCount){
+    this.eps = eps;
+    
+    this.timeToEngage = 1;
+    this.entityCount = 100;
+};
+
+Sim3System.prototype.update = Sim2System.prototype.update;
+
+Sim3System.prototype.engage = function(person){ 
+    person.addEngagement(Math.floor(Math.random() * this.entityCount)); 
+};
+
+var Sim3 = function(){
+    this.canvas = $('#sim3')[0];
+    this.ctx = this.canvas.getContext('2d');
+    this.graph = $('#graph3')[0];
+    this.graphCtx = this.graph.getContext('2d');
+    var that = this;
+    this.graphZoom = 1;
+
+    this.newVal = 2;
+    this.oldVal = 0;
+
+    $('#input3_1').on('change', makeChangeFunction((val) => this.updateFreq(val)));
+    $('#input3_2').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+    $('#input3_3').on('change', makeChangeFunction((val) => this.updateCount(val)));
+    $('#input3_4').on('change', makeChangeFunction((val) => this.updateNew(val)));
+    $('#input3_5').on('change', makeChangeFunction((val) => this.updateOld(val)));
+};
+
+Sim3.prototype.update = Sim2.prototype.update;
+Sim3.prototype.draw = Sim2.prototype.draw;
+
+Sim3.prototype.initialize = function(){
+    this.person = new EnteringPerson();
+    this.personData = new Sim3PersonData();
+    this.system = this.getSystem();
+    this.updateFreq(0);
+};
+
+Sim3.prototype.getSystem = function(){ return new Sim3System(0, 100); };
+Sim3.prototype.getGraphSystem = function(){
+    return new Sim3System(this.system.eps, this.system.entityCount);
+};
+
+Sim3.prototype.updateFreq = Sim2.prototype.updateFreq;
+Sim3.prototype.updateZoom = Sim2.prototype.updateZoom;
+
+Sim3.prototype.updateCount = function(val){
+    this.system.entityCount = val;
+    this.calculateGraph();
+};
+
+Sim3.prototype.updateNew = function(val){
+    this.personData.newVal = val;
+    this.person = new EnteringPerson();
+    this.calculateGraph();
+};
+
+Sim3.prototype.updateOld = function(val){
+    this.personData.oldVal = val;
+    this.person = new EnteringPerson();
+    this.calculateGraph();
+};
+
+Sim3.prototype.calculateGraph = Sim2.prototype.calculateGraph;
+
+Sim3.prototype.calculateData = function(){
+    var averagePulls = _.reduce(this.individualData, (memo, datum) => (memo + datum.pulls), 0) / this.individualData.length;
+    var averagePieceCount = _.reduce(this.individualData, (memo, datum) => (memo + datum.pieceCount), 0) / this.individualData.length;
+    $('#data3_1').text(averagePulls);
+    $('#data3_2').text(averagePieceCount);
 };
 
 var App = function(){
     this.sims = [
         new Sim1(),
         new Sim1c(),
-        new Sim2()
+        new Sim2(),
+        new Sim3()
     ];
     _.each(this.sims, sim => sim.initialize());
 };

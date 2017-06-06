@@ -47,8 +47,8 @@
 <table><tr>
     <td>
       <table>
-      <tr><td><canvas id="sim2" width="480px" height="320px" align="center"></canvas></tr></td>
-      <tr><td><canvas id="graph2" width="480px" height="320px" align="center"></canvas></tr></td>
+      <tr><td><canvas id="sim2" width="480px" height="320px" align="center"></canvas></td></tr>
+      <tr><td><canvas id="graph2" width="480px" height="320px" align="center"></canvas></td></tr>
       </table>
     </td>
     <td>
@@ -59,7 +59,31 @@
 </td></tr></table>
 <h3><a name="chap3">Pull Systems</a></h3>
 <p>This article is actually only going to focus on one specific kind of engagement system. We’re going to look at a couple of pull algorithms, or algorithms for giving players pieces in a random or semi-random way.</p>
-<p>The impetus for this piece came from watching Pokemon Go release the second generation of Pokemon into the wild, so we’re going to use that game as the primary example for the rest of the piece. In particular, we’re going to look at the way players randomly encounter new Pokemon to catch, and consider that a pull system. We’re going to start with the most abstract representation, where we’ll just assume that all of the pieces are of equal value and we’ll assume 100 of them.</p>
+<p>The impetus for this piece came from watching Pokemon Go release the second generation of Pokemon into the wild, so we’re going to use that game as the primary example for the rest of the piece. In particular, we’re going to look at the way players randomly encounter new Pokemon to catch, and consider that a pull system. We’re going to start with the most abstract representation, where we’ll just assume that all of the pieces are of equal value and we’ll assume 100 of them. We're also going to take out over-stimulation for these simulations as it only comes up with collection games where the pieces require effort from the player. We're also going to make people get bored faster so that we can see people start dropping out as they have most of the pieces.</p>
+<table><tr>
+    <td>
+      <table>
+        <tr><td><canvas id="sim3" width="480px" height="320px" align="center"></canvas></td></tr>
+        <tr><td><canvas id="graph3" width="480px" height="320px" align="center"></canvas></td></tr>
+      </table>
+    </td>
+    <td>
+      <p>Pulls per second</p>
+      <input id="input3_1" type="range" min="0" max="30" value="0">
+      <p>Zoom</p>
+      <input id="input3_2" type="range" min="1" max="5" value="1">
+      <p>Number of Pieces</p>
+      <input id="input3_3" type="range" min="100" max="500" value="100">
+      <p>Value of New Piece</p>
+      <input id="input3_4" type="range" min="0" max="5" value="2">
+      <p>Value of Duplicate Piece</p>
+      <input id="input3_5" type="range" min="0" max="5" value="0">
+      <br />
+      <br />
+      <p>Average Number of Pulls: <span id="data3_1"></span></p>
+      <p>Average Number of Unique Pieces: <span id="data3_2"></span></p>
+    </td>
+</tr></table>
 <p>We’re making a few assumptions at this point, and they are at best only partially true. These are:<ul>
     <li><b>Getting things is equivalent to being engaged</b> - This is a hard one to make definitive statements about. I think that getting things is a piece of the puzzle that is engagement, but not the full thing. Its importance changes greatly depending on the kind of game and the consequences of getting a new piece. I personally feel that players need to feel like they are getting value for their time and when a game revolves around collection, this means that they need to collect something meaningful occasionally.</li>
     <li><b>Potential value of a pull is meaningless</b> - ie; players don't care about what they can get, they care about what they did get. This is clearly false. When players have things that they are excited to get, then they are naturally more excited about the chance to get those things. However, that is a layer of complexity too far for these simulations, so the calculation of those effects are left as an exercise for the reader. However, this excitement is a major part of the player experience and you should keep it in mind when designing your own systems.</li>
