@@ -620,6 +620,63 @@ Sim5.prototype.updateData = function(averagePulls, averagePieceCount){
 
 var Sim6aPersonData = Sim3PersonData;
 
+var Sim6aSystem = function(eps, entityCount){
+    this.eps = eps;
+    this.timeToEngage = 1;
+    this.entityCount = entityCount;
+    this.currentIndex = 0;
+};
+
+Sim6aSystem.prototype.update = Sim3System.prototype.update;
+
+Sim6aSystem.prototype.engage = function(person){
+    person.addEngagement(this.currentIndex);
+    this.currentIndex += 1;
+    this.currentIndex %= this.entityCount;
+};
+
+var Sim6a = function(){
+    this.canvas = $('#sim6a')[0];
+    this.ctx = this.canvas.getContext('2d');
+    this.graph = $('#graph6a')[0];
+    this.graphCtx = this.graph.getContext('2d');
+    this.graphZoom = 1;
+
+    $('#input6a_eps').on('change', makeChangeFunction((val) => this.updateFreq(val)));
+    $('#input6a_zoom').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+    $('#input6a_count').on('change', makeChangeFunction((val) => this.updateCount(val)));
+    $('#input6a_newVal').on('change', makeChangeFunction((val) => this.updateNew(val)));
+    $('#input6a_oldVal').on('change', makeChangeFunction((val) => this.updateOld(val)));
+};
+
+Sim6a.prototype.update = Sim5.prototype.update;
+Sim6a.prototype.draw = Sim5.prototype.draw;
+
+Sim6a.prototype.initialize = function(){
+    this.person = new EnteringPerson();
+    this.personData = new Sim6aPersonData();
+    this.system = this.getSystem();
+    this.updateFreq(0);
+};
+
+Sim6a.prototype.getSystem = function(){ return new Sim6aSystem(0, 100); };
+Sim6a.prototype.getGraphSystem = function(){ 
+    return new Sim6aSystem(this.system.eps, this.system.entityCount);
+};
+
+Sim6a.prototype.updateFreq = Sim3.prototype.updateFreq;
+Sim6a.prototype.updateZoom = Sim3.prototype.updateZoom;
+Sim6a.prototype.updateCount = Sim3.prototype.updateCount;
+Sim6a.prototype.updateNew = Sim3.prototype.updateNew;
+Sim6a.prototype.updateOld = Sim3.prototype.updateOld;
+
+Sim6a.prototype.calculateGraph = Sim3.prototype.calculateGraph;
+Sim6a.prototype.calculateData = Sim3.prototype.calculateData;
+Sim6a.prototype.updateData = function(averagePulls, averagePieceCount){
+    $('#data6a_1').text(averagePulls);
+    $('#data6a_2').text(averagePieceCount);
+};
+
 var App = function(){
     this.sims = [
         new Sim1(),
@@ -627,7 +684,8 @@ var App = function(){
         new Sim2(),
         new Sim3(),
         new Sim3b(),
-        new Sim5()
+        new Sim5(),
+        new Sim6a()
     ];
     _.each(this.sims, sim => sim.initialize());
 };
