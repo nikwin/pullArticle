@@ -206,8 +206,8 @@ var Sim2 = function(){
     var that = this;
     this.graphZoom = 1;
     
-    $('#input2_1').on('change', makeChangeFunction((val) => this.updateFreq(val)));
-    $('#input2_2').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+    $('#input2_eps').on('change', makeChangeFunction((val) => this.updateFreq(val)));
+    $('#input2_zoom').on('change', makeChangeFunction((val) => this.updateZoom(val)));
 };
 
 Sim2.prototype.update = function(interval){
@@ -299,7 +299,7 @@ var Sim3EngagementComponent = function(newVal, oldVal){
     this.oldVal = oldVal;
     this.engaged = 0;
     this.boredomFactor = 0.5 + Math.random() * 1;
-    this.boredomFactor *= 2;
+    this.boredomFactor *= 4;
     this.collectedPieces = {};
 };
 
@@ -345,17 +345,13 @@ var Sim3 = function(){
     this.ctx = this.canvas.getContext('2d');
     this.graph = $('#graph3')[0];
     this.graphCtx = this.graph.getContext('2d');
-    var that = this;
     this.graphZoom = 1;
 
-    this.newVal = 2;
-    this.oldVal = 0;
-
-    $('#input3_1').on('change', makeChangeFunction((val) => this.updateFreq(val)));
-    $('#input3_2').on('change', makeChangeFunction((val) => this.updateZoom(val)));
-    $('#input3_3').on('change', makeChangeFunction((val) => this.updateCount(val)));
-    $('#input3_4').on('change', makeChangeFunction((val) => this.updateNew(val)));
-    $('#input3_5').on('change', makeChangeFunction((val) => this.updateOld(val)));
+    $('#input3_eps').on('change', makeChangeFunction((val) => this.updateFreq(val)));
+    $('#input3_zoom').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+    $('#input3_count').on('change', makeChangeFunction((val) => this.updateCount(val)));
+    $('#input3_newVal').on('change', makeChangeFunction((val) => this.updateNew(val)));
+    $('#input3_oldVal').on('change', makeChangeFunction((val) => this.updateOld(val)));
 };
 
 Sim3.prototype.update = Sim2.prototype.update;
@@ -398,16 +394,240 @@ Sim3.prototype.calculateGraph = Sim2.prototype.calculateGraph;
 Sim3.prototype.calculateData = function(){
     var averagePulls = _.reduce(this.individualData, (memo, datum) => (memo + datum.pulls), 0) / this.individualData.length;
     var averagePieceCount = _.reduce(this.individualData, (memo, datum) => (memo + datum.pieceCount), 0) / this.individualData.length;
+    this.updateData(averagePulls, averagePieceCount);
+};
+
+Sim3.prototype.updateData = function(averagePulls, averagePieceCount){
     $('#data3_1').text(averagePulls);
     $('#data3_2').text(averagePieceCount);
 };
+
+var Sim3bPersonData = function(){
+    this.pieces = _.map(_.range(150), function(i){
+        var rareValue = Math.floor(i / 30) + 1;
+        var newVal = (rareValue * 2 + Math.random(5)) / 3;
+        var oldVal = (rareValue + Math.random(2)) / 3;
+        return {
+            newVal: newVal,
+            oldVal: oldVal,
+            weight: 6 - rareValue
+        };
+    });
+};
+
+Sim3bPersonData.prototype.getEngagementComponent = function(){ return new Sim3bEngagementComponent(this.pieces); };
+
+var Sim3bEngagementComponent = function(pieces){
+    this.engaged = 0;
+    this.boredomFactor = 0.5 + Math.random() * 1;
+    this.boredomFactor *= 4;
+    this.collectedPieces = {};
+    this.pieces = pieces;
+};
+
+Sim3bEngagementComponent.prototype.checkLeave = Sim3EngagementComponent.prototype.checkLeave;
+Sim3bEngagementComponent.prototype.update = Sim3EngagementComponent.prototype.update;
+Sim3bEngagementComponent.prototype.deathData = Sim3EngagementComponent.prototype.deathData;
+
+Sim3bEngagementComponent.prototype.addEngagement = function(engagement){
+    if (this.collectedPieces[engagement]){
+        this.collectedPieces[engagement] += 1;
+        this.engaged += this.pieces[engagement].oldVal;
+    }
+    else{
+        this.collectedPieces[engagement] = 1;
+        this.engaged += this.pieces[engagement].newVal;
+    }
+};
+
+var Sim3bSystem = function(eps, pieces){
+    this.eps = eps;
+    this.timeToEngage = 1;
+    this.entityCount = 150;
+    this.pieces = pieces;
+    this.pieceWeightSum = _.reduce(this.pieces, (memo, piece) => memo + piece.weight, 0);
+};
+
+Sim3bSystem.prototype.update = Sim3System.prototype.update;
+
+Sim3bSystem.prototype.engage = function(person){
+    var pieceWeight = Math.floor(Math.random() * this.pieceWeightSum);
+    
+    var counter = 0;
+    for (var i = 0; i < this.pieces.length; i++){
+        counter += this.pieces[i].weight;
+        if (counter > pieceWeight){
+            person.addEngagement(i);
+            break;
+        }
+    }
+};
+
+var Sim3b = function(){
+    this.canvas = $('#sim3b')[0];
+    this.ctx = this.canvas.getContext('2d');
+    this.graph = $('#graph3b')[0];
+    this.graphCtx = this.graph.getContext('2d');
+    this.graphZoom = 1;
+
+    $('#input3b_eps').on('change', makeChangeFunction((val) => this.updateFreq(val)));
+    $('#input3b_zoom').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+};
+
+Sim3b.prototype.update = Sim3.prototype.update;
+Sim3b.prototype.draw = Sim3.prototype.draw;
+
+Sim3b.prototype.initialize = function(){
+    this.person = new EnteringPerson();
+    this.personData = new Sim3bPersonData();
+    this.system = this.getSystem();
+    this.updateFreq(0);
+};
+
+Sim3b.prototype.getSystem = function(){ return new Sim3bSystem(0, this.personData.pieces); };
+Sim3b.prototype.getGraphSystem = function(){
+    return new Sim3bSystem(this.system.eps, this.personData.pieces);
+};
+
+Sim3b.prototype.updateFreq = Sim3.prototype.updateFreq;
+Sim3b.prototype.updateZoom = Sim3.prototype.updateZoom;
+
+Sim3b.prototype.calculateGraph = Sim3.prototype.calculateGraph;
+
+Sim3b.prototype.calculateData = Sim3.prototype.calculateData;
+
+Sim3b.prototype.updateData = function(averagePulls, averagePieceCount){
+    $('#data3b_1').text(averagePulls);
+    $('#data3b_2').text(averagePieceCount);
+};
+
+var Sim5PersonData = function(){
+    this.newVal = 2;
+    this.oldVal = 0;
+    this.startPulls = 0;
+    this.count = 100;
+};
+
+Sim5PersonData.prototype.getEngagementComponent = function(){
+    return new Sim5EngagementComponent(this);
+};
+
+var Sim5EngagementComponent = function(personData){
+    this.newVal = personData.newVal;
+    this.oldVal = personData.oldVal;
+    
+    this.boredomFactor = 0.5 + Math.random() * 1;
+    this.boredomFactor *= 4;
+
+    this.collectedPieces = {};
+
+    for (var i = 0; i < personData.startPulls; i++){
+        this.addEngagement(Math.floor(Math.random() * personData.count));
+    }
+
+    this.engaged = 0;
+    this.pulls = 0;
+    this.pieceCount = 0;
+};
+
+Sim5EngagementComponent.prototype.checkLeave = Sim3EngagementComponent.prototype.checkLeave;
+Sim5EngagementComponent.prototype.update = Sim3EngagementComponent.prototype.update;
+
+Sim5EngagementComponent.prototype.deathData = function(){
+    return {
+        pulls: this.pulls,
+        pieceCount: this.pieceCount
+    };
+};
+
+Sim5EngagementComponent.prototype.addEngagement = function(engagement){
+    this.pulls += 1;
+    if (this.collectedPieces[engagement]){
+        this.collectedPieces[engagement] += 1;
+        this.engaged += this.oldVal;
+    }
+    else{
+        this.collectedPieces[engagement] = 1;
+        this.engaged += this.newVal;
+        this.pieceCount += 1;
+    }
+};
+
+var Sim5 = function(){
+    this.canvas = $('#sim5')[0];
+    this.ctx = this.canvas.getContext('2d');
+    this.graph = $('#graph5')[0];
+    this.graphCtx = this.graph.getContext('2d');
+    this.graphZoom = 1;
+
+    this.oldCount = 100;
+    this.newCount = 0;
+
+    $('#input5_eps').on('change', makeChangeFunction((val) => this.updateFreq(val)));
+    $('#input5_zoom').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+    $('#input5_count').on('change', makeChangeFunction((val) => this.updateCount(val)));
+    $('#input5_newCount').on('change', makeChangeFunction((val) => this.updateNewCount(val)));
+    $('#input5_startPulls').on('change', makeChangeFunction((val) => this.updateStartPulls(val)));
+    $('#input5_newVal').on('change', makeChangeFunction((val) => this.updateNew(val)));
+    $('#input5_oldVal').on('change', makeChangeFunction((val) => this.updateOld(val)));
+};
+
+Sim5.prototype.draw = Sim3.prototype.draw;
+Sim5.prototype.update = Sim3.prototype.update;
+
+Sim5.prototype.initialize = function(){
+    this.person = new EnteringPerson();
+    this.personData = new Sim5PersonData();
+    this.system = this.getSystem();
+    this.updateFreq(0);
+};
+
+Sim5.prototype.getSystem = Sim3.prototype.getSystem;
+Sim5.prototype.getGraphSystem = Sim3.prototype.getGraphSystem;
+
+Sim5.prototype.updateFreq = Sim3.prototype.updateFreq;
+Sim5.prototype.updateZoom = Sim3.prototype.updateZoom;
+
+Sim5.prototype.updateCount = function(val){
+    this.oldCount = val;
+    this.system.entityCount = this.newCount + this.oldCount;
+    this.personData.count = val;
+    this.calculateGraph();
+};
+
+Sim5.prototype.updateNewCount = function(val){
+    this.newCount = val;
+    this.system.entityCount = this.newCount + this.oldCount;
+    this.calculateGraph();
+};
+
+Sim5.prototype.updateStartPulls = function(val){
+    this.personData.startPulls = val;
+    this.person = new EnteringPerson();
+    this.calculateGraph();
+};
+
+Sim5.prototype.updateNew = Sim3.prototype.updateNew;
+Sim5.prototype.updateOld = Sim3.prototype.updateOld;
+
+Sim5.prototype.calculateGraph = Sim3.prototype.calculateGraph;
+Sim5.prototype.calculateData = Sim3.prototype.calculateData;
+
+Sim5.prototype.updateData = function(averagePulls, averagePieceCount){
+    $('#data5_1').text(averagePulls);
+    $('#data5_2').text(averagePieceCount);
+};
+
+var Sim6aPersonData = Sim3PersonData;
 
 var App = function(){
     this.sims = [
         new Sim1(),
         new Sim1c(),
         new Sim2(),
-        new Sim3()
+        new Sim3(),
+        new Sim3b(),
+        new Sim5()
     ];
     _.each(this.sims, sim => sim.initialize());
 };
