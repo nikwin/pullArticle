@@ -15,10 +15,11 @@ var PersonRenderer = function(){
     this.rect = [(width - PERSON_WIDTH) / 2, 
                  (height - PERSON_HEIGHT) / 2, 
                  PERSON_WIDTH, PERSON_HEIGHT];
+    this.imageKey = 'person' + Math.floor(Math.random() * 3);
 };
 
 PersonRenderer.prototype.draw = function(ctx, yOffset){
-    var image = getImage('person');
+    var image = getImage(this.imageKey);
     ctx.drawImage(image, this.rect[0], this.rect[1] + yOffset);
 };
 
