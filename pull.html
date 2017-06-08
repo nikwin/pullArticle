@@ -152,7 +152,7 @@
     </td>
 </tr></table>
 <p>For comparison, you can set one of the above graphs to the same parameters to see what your engagement curve would look like if you just only let people pull from the new items. Of course, this is not practical as your players want the abilty to catch them all, but it is notable how much worse the graphs for this scenario look.</p>
-<h3><a name="chap6">Various Pull Algorithms</a></p>
+<h3><a name="chap6">Various Pull Algorithms</a></h3>
 <p>We've only worked with simple, highly random pull algorithms thus far. In this section, we'll take a look at some other kinds.</p>
 <h4><a name="chap6a">Deterministic</a></h4>
 <p>What does this graph look like in the trivial case of just going through every element one by one?</p>
@@ -183,9 +183,63 @@
 <p>This simulation is the clearest way to demonstrate the failings of these simulations. It <i>feels</i> very different for players to get random pulls and to get deterministic pulls. One reason for this is that being able to calculate the effort required for something changes the way players value that thing. These simulations have no way to model that though. They can only show you what players get.</p>
 <h3><a name="chap6b">Placing a Ceiling on Bad Pulls</a></h3>
 <p>A common approach to smooth out the variance of a pull system is to place a ceiling on the number of low-value pulls. That results in graphs that look like this:</p>
-<p>On a personal note, I dislike it when games do this without communicating the skew to the player because I feel it reinforces the Gambler’s Fallacy. I also feel that making the cap more explicit is a better experience for the player as the player doesn’t feel like bad pulls help them get to good pulls when it is implicit.</p>
+<table><tr>
+    <td>
+      <table>
+        <tr><td><canvas id="sim6b" width="480px" height="320px" align="center"></canvas></td></tr>
+        <tr><td><canvas id="graph6b" width="480px" height="320px" align="center"></canvas></td></tr>
+      </table>
+    </td>
+    <td>
+      <p>Pulls per second</p>
+      <input id="input6b_eps" type="range" min="0" max="30" value="0">
+      <p>Zoom</p>
+      <input id="input6b_zoom" type="range" min="1" max="5" value="1">
+      <p>Number of Pieces</p>
+      <input id="input6b_count" type="range" min="100" max="500" value="100" step="10">
+      <p>Value of New Piece</p>
+      <input id="input6b_newVal" type="range" min="0" max="5" value="2">
+      <p>Value of Duplicate Piece</p>
+      <input id="input6b_oldVal" type="range" min="0" max="5" value="0">
+      <p>Bad Pull Cap</p>
+      <input id="input6b_pullCap" type="range" min="0" max="250" value="0" step="10">
+      <br />
+      <br />
+      <p>Average Number of Pulls: <span id="data6b_1"></span></p>
+      <p>Average Number of Unique Pieces: <span id="data6b_2"></span></p>
+    </td>
+</tr></table>
+<p>On a personal note, I dislike it when games do this without communicating the skew to the player because I feel it reinforces the gambler’s fallacy. I also feel that making the cap more explicit is a better experience for the player as the player doesn’t feel like bad pulls help them get to good pulls when it is implicit.</p>
 <h3><a name="chap6c">Pokemon Red and Blue</a></h3>
 <p>Another option is to divide your pool of pulls across a lot of smaller pools and then let the player move between them. This is essentially what <i>Pokemon Red</i> did and also what a game like <i>Heroes Charge</i> does as well. This changes the flow to be much wavier, and so the graph looks more like this:</p>
+<table><tr>
+    <td>
+      <table>
+        <tr><td><canvas id="sim6c" width="480px" height="320px" align="center"></canvas></td></tr>
+        <tr><td><canvas id="graph6c" width="480px" height="320px" align="center"></canvas></td></tr>
+      </table>
+    </td>
+    <td>
+      <p>Pulls per second</p>
+      <input id="input6c_eps" type="range" min="0" max="30" value="0">
+      <p>Zoom</p>
+      <input id="input6c_zoom" type="range" min="1" max="5" value="1">
+      <p>Number of Old Pieces</p>
+      <input id="input5_count" type="range" min="100" max="500" value="100" step="10">
+      <p>Number of New Pieces</p>
+      <input id="input5_newCount" type="range" min="0" max="500" value="100" step="10">
+      <p>Starting Number of Pulls</p>
+      <input id="input5_startPulls" type="range" min="0" max="2000" value="0" step="50">
+      <p>Value of New Piece</p>
+      <input id="input6c_newVal" type="range" min="0" max="5" value="2">
+      <p>Value of Duplicate Piece</p>
+      <input id="input6c_oldVal" type="range" min="0" max="5" value="0">
+      <br />
+      <br />
+      <p>Average Number of Pulls: <span id="data6c_1"></span></p>
+      <p>Average Number of Unique Pieces: <span id="data6c_2"></span></p>
+    </td>
+</tr></table>
 <p>Of course, there are a lot of ways to implement a division like this and the amount of effort required is dependent on the kind of separation that you want to make.</p>
 <h3><a name="conclusion">Conclusion</a></h3>
 <p>This is, of course, a very incomplete taxonomy. Hopefully though, it lets you think about how players interact with the pull systems that you have made and the potential problems and benefits of these solutions.</p>
