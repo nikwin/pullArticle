@@ -9,10 +9,23 @@ var EFFECT_HEIGHT = 32;
 
 var GRAPH_COUNT = 1000;
 
-var Person = function(personData){
+
+
+var PersonRenderer = function(){
+    this.rect = [(width - PERSON_WIDTH) / 2, 
+                 (height - PERSON_HEIGHT) / 2, 
+                 PERSON_WIDTH, PERSON_HEIGHT];
+};
+
+PersonRenderer.prototype.draw = function(ctx, yOffset){
+    var image = getImage('person');
+    ctx.drawImage(image, this.rect[0], this.rect[1] + yOffset);
+};
+
+var Person = function(personData, renderer){
     this.engagementComponent = personData.getEngagementComponent();
     this.effects = [];
-    this.rect = [(width - PERSON_WIDTH) / 2, (height - PERSON_HEIGHT) / 2, PERSON_WIDTH, PERSON_HEIGHT];
+    this.renderer = renderer;
 };
 
 Person.prototype.update = function(interval){
@@ -42,8 +55,7 @@ Person.prototype.draw = function(ctx){
 
     ctx.drawImage(getImage('smiley'), indicatorX, 14);
     
-    var image = getImage('person');
-    ctx.drawImage(image, this.rect[0], this.rect[1]);
+    this.renderer.draw(ctx, 0);
     _.each(this.effects, effect => effect.draw(ctx));
 };
 
@@ -90,6 +102,7 @@ FirstEngagementComponent.prototype.deathData = falseFunction;
 
 var EnteringPerson = function(){
     this.timeToAnimation = 1;
+    this.renderer = new PersonRenderer();
 };
 
 EnteringPerson.prototype.update = function(interval){
@@ -98,12 +111,12 @@ EnteringPerson.prototype.update = function(interval){
 };
 
 EnteringPerson.prototype.draw = function(ctx){
-    ctx.drawImage(getImage('person'), (width - PERSON_WIDTH) / 2, 
-                  (height - PERSON_HEIGHT) / 2 + ((height + PERSON_HEIGHT) / 2 * this.timeToAnimation));
+    this.renderer.draw(ctx, (height + PERSON_HEIGHT) / 2 * this.timeToAnimation);
 };
 
-var LeavingPerson = function(){
+var LeavingPerson = function(personData, renderer){
     this.timeToAnimation = 1;
+    this.renderer = renderer;
 };
 
 LeavingPerson.prototype.update = function(interval){
@@ -112,8 +125,7 @@ LeavingPerson.prototype.update = function(interval){
 };
 
 LeavingPerson.prototype.draw = function(ctx){
-    ctx.drawImage(getImage('person'), (width - PERSON_WIDTH) / 2, 
-                  (height - PERSON_HEIGHT) / 2 + ((height + PERSON_HEIGHT) / 2 * (1 - this.timeToAnimation)));
+    this.renderer.draw(ctx, (height + PERSON_HEIGHT) / 2 * (1 - this.timeToAnimation));
 };
 
 EnteringPerson.prototype.next = Person;
@@ -128,13 +140,13 @@ var Sim1 = function(){
 
 Sim1.prototype.update = function(interval){
     if (!this.person.update(interval)){
-        this.person = new this.person.next(this.personData);
+        this.person = new this.person.next(this.personData, this.person.renderer);
     }
     return true;
 };
 
 Sim1.prototype.draw = function(){
-    this.ctx.fillStyle = '#000000';
+    this.ctx.fillStyle = '#aaaacc';
     this.ctx.fillRect(0, 0, width, height);
     this.person.draw(this.ctx);
 };
@@ -212,7 +224,7 @@ var Sim2 = function(){
 
 Sim2.prototype.update = function(interval){
     if (!this.person.update(interval)){
-        this.person = new this.person.next(this.personData);
+        this.person = new this.person.next(this.personData, this.person.renderer);
     }
 
     if (this.person.addEngagement){
@@ -223,7 +235,7 @@ Sim2.prototype.update = function(interval){
 };
 
 Sim2.prototype.draw = function(){
-    this.ctx.fillStyle = '#000000';
+    this.ctx.fillStyle = '#aaaacc';
     this.ctx.fillRect(0, 0, width, height);
     this.person.draw(this.ctx);
     this.graphCtx.fillStyle = '#aaaaaa';
@@ -789,8 +801,7 @@ var Sim6cEngagementComponent = function(personData){
     this.oldVal = personData.oldVal;
     
     this.boredomFactor = 0.5 + Math.random() * 1;
-    this.boredomFactor *= 4;
-
+    
     this.collectedPieces = {};
 
     this.currentRange = 0;
