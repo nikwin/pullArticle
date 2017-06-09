@@ -456,7 +456,7 @@ var Sim3bEngagementComponent = function(pieces, boredomMult){
     this.engaged = 0;
     this.boredomFactor = (0.5 + Math.random()) * boredomMult;
     this.collectedPieces = {};
-    this.pieces = pieces;
+    this.pieces = _.map(pieces, piece => _.clone(piece));
 };
 
 Sim3bEngagementComponent.prototype.checkLeave = Sim3EngagementComponent.prototype.checkLeave;
@@ -467,6 +467,7 @@ Sim3bEngagementComponent.prototype.addEngagement = function(engagement){
     if (this.collectedPieces[engagement]){
         this.collectedPieces[engagement] += 1;
         this.engaged += this.pieces[engagement].oldVal;
+        this.pieces[engagement].oldVal = max(this.pieces[engagement].oldVal - 0.25, 0);
     }
     else{
         this.collectedPieces[engagement] = 1;
