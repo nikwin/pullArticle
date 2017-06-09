@@ -9,8 +9,6 @@ var EFFECT_HEIGHT = 32;
 
 var GRAPH_COUNT = 1000;
 
-
-
 var PersonRenderer = function(){
     this.rect = [(width - PERSON_WIDTH) / 2, 
                  (height - PERSON_HEIGHT) / 2, 
@@ -60,9 +58,13 @@ Person.prototype.draw = function(ctx){
     _.each(this.effects, effect => effect.draw(ctx));
 };
 
-var FirstPersonData = function(){};
+var FirstPersonData = function(){
+    this.boredomMult = 1;
+};
 
-FirstPersonData.prototype.getEngagementComponent = function(){ return new FirstEngagementComponent(); };
+FirstPersonData.prototype.getEngagementComponent = function(){ 
+    return new FirstEngagementComponent(this.boredomMult); 
+};
 
 
 var SmileEffect = function(){
@@ -81,9 +83,9 @@ SmileEffect.prototype.draw = function(ctx){
     ctx.drawImage(image, this.rect[0], this.rect[1]);
 };
 
-var FirstEngagementComponent = function(){
+var FirstEngagementComponent = function(boredomMult){
     this.engaged = 0;
-    this.boredomFactor = 0.5 + Math.random() * 1;
+    this.boredomFactor = (0.5 + Math.random()) * boredomMult;
 };
 
 FirstEngagementComponent.prototype.checkLeave = function(){
@@ -221,6 +223,7 @@ var Sim2 = function(){
     
     $('#input2_eps').on('change', makeChangeFunction((val) => this.updateFreq(val)));
     $('#input2_zoom').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+    $('#input2_bore').on('change', makeChangeFunction((val) => this.updateBore(val)));
 };
 
 Sim2.prototype.update = function(interval){
@@ -239,18 +242,24 @@ Sim2.prototype.draw = function(){
     this.ctx.fillStyle = '#aaaacc';
     this.ctx.fillRect(0, 0, width, height);
     this.person.draw(this.ctx);
+    
     this.graphCtx.fillStyle = '#aaaaaa';
     this.graphCtx.fillRect(0, 0, width, height);
     this.graphCtx.strokeStyle = '#000000';
     this.graphCtx.strokeWidth = 2;
     this.graphCtx.beginPath();
-    var startPos = [0, height * (1 - this.dataPoints[0])];
+    var startPos = [5, (height - 5) * (1 - this.dataPoints[0])];
     this.graphCtx.moveTo(startPos[0], startPos[1]);
-    for (var i = 1; i < this.dataPoints.length; i++){
-        var pos = [i * this.graphZoom, height * (1 - this.dataPoints[i])];
+    for (var i = 1; i < this.dataPoints.length - 5; i++){
+        var pos = [i * this.graphZoom + 5, (height - 5) * (1 - this.dataPoints[i])];
+        this.graphCtx.moveTo(pos[0], height - 5);
         this.graphCtx.lineTo(pos[0], pos[1]);
     }
     this.graphCtx.stroke();
+    
+    this.graphCtx.fillStyle = '#000000';
+    this.graphCtx.fillText('x axis - time', width - 125, 20);
+    this.graphCtx.fillText('y axis - players left', width - 125, 40);
 };
 
 Sim2.prototype.initialize = function(){
@@ -270,6 +279,12 @@ Sim2.prototype.updateFreq = function(newValue){
 
 Sim2.prototype.updateZoom = function(newValue){
     this.graphZoom = newValue;
+    this.calculateGraph();
+};
+
+Sim2.prototype.updateBore = function(newValue){
+    this.personData.boredomMult = newValue;
+    this.person = new EnteringPerson();
     this.calculateGraph();
 };
 
@@ -303,16 +318,18 @@ Sim2.prototype.calculateData = trueFunction;
 var Sim3PersonData = function(){
     this.newVal = 2;
     this.oldVal = 0;
+    this.boredomMult = 1;
 };
 
-Sim3PersonData.prototype.getEngagementComponent = function(){ return new Sim3EngagementComponent(this.newVal, this.oldVal); };
+Sim3PersonData.prototype.getEngagementComponent = function(){ 
+    return new Sim3EngagementComponent(this.newVal, this.oldVal, this.boredomMult); 
+};
 
-var Sim3EngagementComponent = function(newVal, oldVal){
+var Sim3EngagementComponent = function(newVal, oldVal, boredomMult){
     this.newVal = newVal;
     this.oldVal = oldVal;
     this.engaged = 0;
-    this.boredomFactor = 0.5 + Math.random() * 1;
-    this.boredomFactor *= 4;
+    this.boredomFactor = (0.5 + Math.random()) * boredomMult;
     this.collectedPieces = {};
 };
 
@@ -362,6 +379,7 @@ var Sim3 = function(){
 
     $('#input3_eps').on('change', makeChangeFunction((val) => this.updateFreq(val)));
     $('#input3_zoom').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+    $('#input3_bore').on('change', makeChangeFunction((val) => this.updateBore(val)));
     $('#input3_count').on('change', makeChangeFunction((val) => this.updateCount(val)));
     $('#input3_newVal').on('change', makeChangeFunction((val) => this.updateNew(val)));
     $('#input3_oldVal').on('change', makeChangeFunction((val) => this.updateOld(val)));
@@ -384,6 +402,7 @@ Sim3.prototype.getGraphSystem = function(){
 
 Sim3.prototype.updateFreq = Sim2.prototype.updateFreq;
 Sim3.prototype.updateZoom = Sim2.prototype.updateZoom;
+Sim3.prototype.updateBore = Sim2.prototype.updateBore;
 
 Sim3.prototype.updateCount = function(val){
     this.system.entityCount = val;
@@ -426,14 +445,16 @@ var Sim3bPersonData = function(){
             weight: 6 - rareValue
         };
     });
+    this.boredomMult = 1;
 };
 
-Sim3bPersonData.prototype.getEngagementComponent = function(){ return new Sim3bEngagementComponent(this.pieces); };
+Sim3bPersonData.prototype.getEngagementComponent = function(){ 
+    return new Sim3bEngagementComponent(this.pieces, this.boredomMult);
+};
 
-var Sim3bEngagementComponent = function(pieces){
+var Sim3bEngagementComponent = function(pieces, boredomMult){
     this.engaged = 0;
-    this.boredomFactor = 0.5 + Math.random() * 1;
-    this.boredomFactor *= 4;
+    this.boredomFactor = (0.5 + Math.random()) * boredomMult;
     this.collectedPieces = {};
     this.pieces = pieces;
 };
@@ -485,6 +506,7 @@ var Sim3b = function(){
 
     $('#input3b_eps').on('change', makeChangeFunction((val) => this.updateFreq(val)));
     $('#input3b_zoom').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+    $('#input3b_bore').on('change', makeChangeFunction((val) => this.updateBore(val)));
 };
 
 Sim3b.prototype.update = Sim3.prototype.update;
@@ -504,6 +526,7 @@ Sim3b.prototype.getGraphSystem = function(){
 
 Sim3b.prototype.updateFreq = Sim3.prototype.updateFreq;
 Sim3b.prototype.updateZoom = Sim3.prototype.updateZoom;
+Sim3b.prototype.updateBore = Sim3.prototype.updateBore;
 
 Sim3b.prototype.calculateGraph = Sim3.prototype.calculateGraph;
 
@@ -519,6 +542,7 @@ var Sim5PersonData = function(){
     this.oldVal = 0;
     this.startPulls = 0;
     this.count = 100;
+    this.boredomMult = 1;
 };
 
 Sim5PersonData.prototype.getEngagementComponent = function(){
@@ -529,9 +553,8 @@ var Sim5EngagementComponent = function(personData){
     this.newVal = personData.newVal;
     this.oldVal = personData.oldVal;
     
-    this.boredomFactor = 0.5 + Math.random() * 1;
-    this.boredomFactor *= 4;
-
+    this.boredomFactor = (0.5 + Math.random()) * personData.boredomMult;
+    
     this.collectedPieces = {};
 
     for (var i = 0; i < personData.startPulls; i++){
@@ -578,6 +601,7 @@ var Sim5 = function(){
 
     $('#input5_eps').on('change', makeChangeFunction((val) => this.updateFreq(val)));
     $('#input5_zoom').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+    $('#input5_bore').on('change', makeChangeFunction((val) => this.updateBore(val)));
     $('#input5_count').on('change', makeChangeFunction((val) => this.updateCount(val)));
     $('#input5_newCount').on('change', makeChangeFunction((val) => this.updateNewCount(val)));
     $('#input5_startPulls').on('change', makeChangeFunction((val) => this.updateStartPulls(val)));
@@ -600,6 +624,7 @@ Sim5.prototype.getGraphSystem = Sim3.prototype.getGraphSystem;
 
 Sim5.prototype.updateFreq = Sim3.prototype.updateFreq;
 Sim5.prototype.updateZoom = Sim3.prototype.updateZoom;
+Sim5.prototype.updateBore = Sim3.prototype.updateBore;
 
 Sim5.prototype.updateCount = function(val){
     this.oldCount = val;
@@ -631,8 +656,6 @@ Sim5.prototype.updateData = function(averagePulls, averagePieceCount){
     $('#data5_2').text(averagePieceCount);
 };
 
-var Sim6aPersonData = Sim3PersonData;
-
 var Sim6aSystem = function(eps, entityCount){
     this.eps = eps;
     this.timeToEngage = 1;
@@ -657,6 +680,7 @@ var Sim6a = function(){
 
     $('#input6a_eps').on('change', makeChangeFunction((val) => this.updateFreq(val)));
     $('#input6a_zoom').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+    $('#input6a_bore').on('change', makeChangeFunction((val) => this.updateBore(val)));
     $('#input6a_count').on('change', makeChangeFunction((val) => this.updateCount(val)));
     $('#input6a_newVal').on('change', makeChangeFunction((val) => this.updateNew(val)));
     $('#input6a_oldVal').on('change', makeChangeFunction((val) => this.updateOld(val)));
@@ -667,7 +691,7 @@ Sim6a.prototype.draw = Sim5.prototype.draw;
 
 Sim6a.prototype.initialize = function(){
     this.person = new EnteringPerson();
-    this.personData = new Sim6aPersonData();
+    this.personData = new Sim3PersonData();
     this.system = this.getSystem();
     this.updateFreq(0);
 };
@@ -679,6 +703,7 @@ Sim6a.prototype.getGraphSystem = function(){
 
 Sim6a.prototype.updateFreq = Sim3.prototype.updateFreq;
 Sim6a.prototype.updateZoom = Sim3.prototype.updateZoom;
+Sim6a.prototype.updateBore = Sim3.prototype.updateBore;
 Sim6a.prototype.updateCount = Sim3.prototype.updateCount;
 Sim6a.prototype.updateNew = Sim3.prototype.updateNew;
 Sim6a.prototype.updateOld = Sim3.prototype.updateOld;
@@ -690,16 +715,21 @@ Sim6a.prototype.updateData = function(averagePulls, averagePieceCount){
     $('#data6a_2').text(averagePieceCount);
 };
 
-var Sim6bPersonData = Sim3PersonData;
+var Sim6bPersonData = function(){
+    this.newVal = 2;
+    this.oldVal = 0;
+    this.boredomMult = 1;
+};
 
-Sim6bPersonData.prototype.getEngagementComponent = function(){ return new Sim6bEngagementComponent(this.newVal, this.oldVal); };
+Sim6bPersonData.prototype.getEngagementComponent = function(){ 
+    return new Sim6bEngagementComponent(this.newVal, this.oldVal, this.boredomMult);
+};
 
-var Sim6bEngagementComponent = function(newVal, oldVal){
+var Sim6bEngagementComponent = function(newVal, oldVal, boredomMult){
     this.newVal = newVal;
     this.oldVal = oldVal;
     this.engaged = 0;
-    this.boredomFactor = 0.5 * Math.random() * 1;
-    this.boredomFactor *= 4;
+    this.boredomFactor = (0.5 + Math.random()) * boredomMult;
     this.collectedPieces = {};
     this.badPulls = 0;
 };
@@ -746,6 +776,7 @@ var Sim6b = function(){
 
     $('#input6b_eps').on('change', makeChangeFunction((val) => this.updateFreq(val)));
     $('#input6b_zoom').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+    $('#input6b_bore').on('change', makeChangeFunction((val) => this.updateBore(val)));
     $('#input6b_count').on('change', makeChangeFunction((val) => this.updateCount(val)));
     $('#input6b_newVal').on('change', makeChangeFunction((val) => this.updateNew(val)));
     $('#input6b_oldVal').on('change', makeChangeFunction((val) => this.updateOld(val)));
@@ -770,6 +801,7 @@ Sim6b.prototype.getGraphSystem = function(){
 
 Sim6b.prototype.updateFreq = Sim3.prototype.updateFreq;
 Sim6b.prototype.updateZoom = Sim3.prototype.updateZoom;
+Sim6b.prototype.updateBore = Sim3.prototype.updateBore;
 Sim6b.prototype.updateCount = Sim3.prototype.updateCount;
 Sim6b.prototype.updateNew = Sim3.prototype.updateNew;
 Sim6b.prototype.updateOld = Sim3.prototype.updateOld;
@@ -791,6 +823,7 @@ var Sim6cPersonData = function(){
     this.oldVal = 0;
     this.startPulls = 0;
     this.count = 100;
+    this.boredomMult = 1;
 };
 
 Sim6cPersonData.prototype.getEngagementComponent = function(){
@@ -801,7 +834,7 @@ var Sim6cEngagementComponent = function(personData){
     this.newVal = personData.newVal;
     this.oldVal = personData.oldVal;
     
-    this.boredomFactor = 0.5 + Math.random() * 1;
+    this.boredomFactor = (0.5 + Math.random()) * personData.boredomMult;
     
     this.collectedPieces = {};
 
@@ -881,6 +914,7 @@ var Sim6c = function(){
 
     $('#input6c_eps').on('change', makeChangeFunction((val) => this.updateFreq(val)));
     $('#input6c_zoom').on('change', makeChangeFunction((val) => this.updateZoom(val)));
+    $('#input6c_bore').on('change', makeChangeFunction((val) => this.updateBore(val)));
     $('#input6c_count').on('change', makeChangeFunction((val) => this.updateCount(val)));
     $('#input6c_newCount').on('change', makeChangeFunction((val) => this.updateNewCount(val)));
     $('#input6c_startPulls').on('change', makeChangeFunction((val) => this.updateStartPulls(val)));
@@ -905,6 +939,7 @@ Sim6c.prototype.getGraphSystem = function(){
 
 Sim6c.prototype.updateFreq = Sim5.prototype.updateFreq;
 Sim6c.prototype.updateZoom = Sim5.prototype.updateZoom;
+Sim6c.prototype.updateBore = Sim5.prototype.updateBore;
 
 Sim6c.prototype.updateCount = Sim5.prototype.updateCount;
 
