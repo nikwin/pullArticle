@@ -350,10 +350,12 @@ Sim3EngagementComponent.prototype.addEngagement = function(engagement){
     if (this.collectedPieces[engagement]){
         this.collectedPieces[engagement] += 1;
         this.engaged += this.oldVal;
+        return this.oldVal;
     }
     else{
         this.collectedPieces[engagement] = 1;
         this.engaged += this.newVal;
+        return this.newVal;
     }
 };
 
@@ -464,15 +466,18 @@ Sim3bEngagementComponent.prototype.update = Sim3EngagementComponent.prototype.up
 Sim3bEngagementComponent.prototype.deathData = Sim3EngagementComponent.prototype.deathData;
 
 Sim3bEngagementComponent.prototype.addEngagement = function(engagement){
+    var engage;
     if (this.collectedPieces[engagement]){
         this.collectedPieces[engagement] += 1;
-        this.engaged += this.pieces[engagement].oldVal;
+        engage = this.pieces[engagement].oldVal;
         this.pieces[engagement].oldVal = max(this.pieces[engagement].oldVal - 0.25, 0);
     }
     else{
         this.collectedPieces[engagement] = 1;
-        this.engaged += this.pieces[engagement].newVal;
+        engage = this.pieces[engagement].newVal;
     }
+    this.engaged += engage;
+    return engage;
 };
 
 var Sim3bSystem = function(eps, pieces){
@@ -582,11 +587,13 @@ Sim5EngagementComponent.prototype.addEngagement = function(engagement){
     if (this.collectedPieces[engagement]){
         this.collectedPieces[engagement] += 1;
         this.engaged += this.oldVal;
+        return this.oldVal;
     }
     else{
         this.collectedPieces[engagement] = 1;
         this.engaged += this.newVal;
         this.pieceCount += 1;
+        return this.newVal;
     }
 };
 
