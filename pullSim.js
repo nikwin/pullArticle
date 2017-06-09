@@ -995,7 +995,17 @@ var getFrameFunctions = function(){
     };
 };
 
+var initialize = function(){
+    $('input[type=range]').on('change', function(){
+        var val = $(this).val();
+        var id = $(this).attr('id');
+        id = '#' + id.replace('input', 'disp');
+        $(id).text(val);
+    });
+};
+
 var main = function(){
+    initialize();
     var functions = getFrameFunctions();
     var tickFun = function(){
         var cont = functions.update();
