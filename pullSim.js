@@ -9,6 +9,8 @@ var EFFECT_HEIGHT = 32;
 
 var GRAPH_COUNT = 1000;
 
+var ENGAGE_RANGE = 10;
+
 var PersonRenderer = function(){
     this.rect = [(width - PERSON_WIDTH) / 2, 
                  (height - PERSON_HEIGHT) / 2, 
@@ -50,7 +52,7 @@ Person.prototype.draw = function(ctx){
     ctx.fillStyle = '#330000';
     ctx.fillRect(0, 10, width, 40);
 
-    var indicatorX = width * (this.engagementComponent.engaged + 5) / 10;
+    var indicatorX = width * ((this.engagementComponent.engaged / (2 * ENGAGE_RANGE) + 0.5));
 
     ctx.drawImage(getImage('smiley'), indicatorX, 14);
     
@@ -89,7 +91,7 @@ var FirstEngagementComponent = function(boredomMult){
 };
 
 FirstEngagementComponent.prototype.checkLeave = function(){
-    return (this.engaged > -5) && (this.engaged < 5);
+    return this.engaged > (-1 * ENGAGE_RANGE);
 };
 
 FirstEngagementComponent.prototype.update = function(interval){
@@ -98,6 +100,7 @@ FirstEngagementComponent.prototype.update = function(interval){
 
 FirstEngagementComponent.prototype.addEngagement = function(engagement){
     this.engaged += engagement;
+    this.engaged = min(this.engaged, ENGAGE_RANGE);
     return engagement;
 };
 
@@ -198,9 +201,9 @@ var Sim2System = function(eps){
 
 Sim2System.prototype.update = function(people, interval){
     this.timeToEngage -= interval * this.eps / 10;
-    if (this.timeToEngage < 0){
+    while (this.timeToEngage < 0){
         _.each(people, (person) => this.engage(person));
-        this.timeToEngage = 1;
+        this.timeToEngage += 1;
     }
 };
 
@@ -333,9 +336,7 @@ var Sim3EngagementComponent = function(newVal, oldVal, boredomMult){
     this.collectedPieces = {};
 };
 
-Sim3EngagementComponent.prototype.checkLeave = function(){
-    return this.engaged > -5;
-};
+Sim3EngagementComponent.prototype.checkLeave = FirstEngagementComponent.prototype.checkLeave;
 
 Sim3EngagementComponent.prototype.update = FirstEngagementComponent.prototype.update;
 
@@ -347,16 +348,18 @@ Sim3EngagementComponent.prototype.deathData = function(){
 };
 
 Sim3EngagementComponent.prototype.addEngagement = function(engagement){
+    var engage;
     if (this.collectedPieces[engagement]){
         this.collectedPieces[engagement] += 1;
-        this.engaged += this.oldVal;
-        return this.oldVal;
+        engage = this.oldVal;
     }
     else{
         this.collectedPieces[engagement] = 1;
-        this.engaged += this.newVal;
-        return this.newVal;
+        engage = this.newVal;
     }
+    this.engaged += engage;
+    this.engaged = min(this.engaged, ENGAGE_RANGE);
+    return engage;
 };
 
 var Sim3System = function(eps, entityCount){
@@ -434,6 +437,7 @@ Sim3.prototype.calculateData = function(){
 Sim3.prototype.updateData = function(averagePulls, averagePieceCount){
     $('#data3_1').text(averagePulls);
     $('#data3_2').text(averagePieceCount);
+    $('#data3_time').text(averagePulls / this.system.eps);
 };
 
 var Sim3bPersonData = function(){
@@ -477,6 +481,7 @@ Sim3bEngagementComponent.prototype.addEngagement = function(engagement){
         engage = this.pieces[engagement].newVal;
     }
     this.engaged += engage;
+    this.engaged = min(this.engaged, ENGAGE_RANGE);
     return engage;
 };
 
@@ -541,6 +546,7 @@ Sim3b.prototype.calculateData = Sim3.prototype.calculateData;
 Sim3b.prototype.updateData = function(averagePulls, averagePieceCount){
     $('#data3b_1').text(averagePulls);
     $('#data3b_2').text(averagePieceCount);
+    $('#data3b_time').text(averagePulls / this.system.eps);
 };
 
 var Sim5PersonData = function(){
@@ -584,17 +590,20 @@ Sim5EngagementComponent.prototype.deathData = function(){
 
 Sim5EngagementComponent.prototype.addEngagement = function(engagement){
     this.pulls += 1;
+    var engage;
     if (this.collectedPieces[engagement]){
         this.collectedPieces[engagement] += 1;
-        this.engaged += this.oldVal;
-        return this.oldVal;
+        engage = this.oldVal;
     }
     else{
         this.collectedPieces[engagement] = 1;
-        this.engaged += this.newVal;
+        engage = this.newVal;
         this.pieceCount += 1;
-        return this.newVal;
     }
+
+    this.engaged += engage;
+    this.engaged = min(this.engaged, ENGAGE_RANGE);
+    return engage;
 };
 
 var Sim5 = function(){
@@ -662,6 +671,7 @@ Sim5.prototype.calculateData = Sim3.prototype.calculateData;
 Sim5.prototype.updateData = function(averagePulls, averagePieceCount){
     $('#data5_1').text(averagePulls);
     $('#data5_2').text(averagePieceCount);
+    $('#data5_time').text(averagePulls / this.system.eps);
 };
 
 var Sim6aSystem = function(eps, entityCount){
@@ -721,6 +731,7 @@ Sim6a.prototype.calculateData = Sim3.prototype.calculateData;
 Sim6a.prototype.updateData = function(averagePulls, averagePieceCount){
     $('#data6a_1').text(averagePulls);
     $('#data6a_2').text(averagePieceCount);
+    $('#data6a_time').text(averagePulls / this.system.eps);
 };
 
 var Sim6bPersonData = function(){
@@ -824,6 +835,7 @@ Sim6b.prototype.calculateData = Sim3.prototype.calculateData;
 Sim6b.prototype.updateData = function(averagePulls, averagePieceCount){
     $('#data6b_1').text(averagePulls);
     $('#data6b_2').text(averagePieceCount);
+    $('#data6b_time').text(averagePulls / this.system.eps);
 };
 
 var Sim6cPersonData = function(){
@@ -884,6 +896,7 @@ Sim6cEngagementComponent.prototype.addEngagement = function(count){
     }
     
     this.engaged += engageVal;
+    this.engaged = min(this.engaged, ENGAGE_RANGE);
     return engageVal;
 };
 
@@ -963,13 +976,13 @@ Sim6c.prototype.calculateData = Sim5.prototype.calculateData;
 Sim6c.prototype.updateData = function(averagePulls, averagePieceCount){
     $('#data6c_1').text(averagePulls);
     $('#data6c_2').text(averagePieceCount);
+    $('#data6c_time').text(averagePulls / this.system.eps);
 };
 
 
 var App = function(){
     this.sims = [
         new Sim1(),
-        new Sim1c(),
         new Sim2(),
         new Sim3(),
         new Sim3b(),

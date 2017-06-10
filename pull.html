@@ -3,17 +3,16 @@
 <script type="text/javascript" src="std.js"></script>
 <script type="text/javascript" src="pullSim.js"></script>
 <h2>Pull Algorithms</h2>
-<p>When designing a game that revolves around getting collectibles of some kind through a random pull, it’s hard to actually visualize how that algorithm is going to play out. As it is difficult to fully grasp the consequences of these random distributions it is difficult to design these systems perfectly. Over the course of this article, I’m going to present a bunch of small simulations to help understand various algorithms.</p>
+<p>Often when designing games, we need to design a pull algorithm, or a way to give the player a random game object from a pool of random objects. It's hard to visualize how these random distributions look in practice and so difficult to design them well. Over the course of this article, I’m going to present a bunch of small simulations to help understand various algorithms.</p>
 <h3>Table of Contents</h3>
 <p><ul>
     <li><a href="#chap1">Basic Player Engagement</a><ul>
         <li><a href="#chap1a">Stimulation</a></li>
         <li><a href="#chap1b">On The Simplifications of the Article</a></li>
-        <li><a href="#chap1c">Different Things Are Differently Engaging</a></li>
     </ul></li>
-    <li><a href="#chap2">Systems of Engagement</a></li>
+    <li><a href="#chap2">Basic Systems</a></li>
     <li><a href="#chap3">Pull Systems</a><ul>
-        <li><a href="#chap3a">Simple Simulations</a></li>
+        <li><a href="#chap3a">Simple Simulation</a></li>
         <li><a href="#chap3b">Pokemon Go</a></li>
     </ul></li>
     <li><a href="#chap5">Introducing New Content</a></li>
@@ -24,31 +23,27 @@
     </ul></li>
     <li><a href="#conclusion">Conclusion</a></li>
 </ul></p>
-<h3><a name="chap1">Basic Player Engagement</a></h3>
-<h4><a name="chap1a">Stimulation</a></h4>
-<p>This is our first simulation and it’s pretty simple. Just click on the players to engage them. Different players require different amounts of engagement. If a player receives too little stimulation, they will get bored and leave. If they receive too much, they will be overstimulated and will leave.</p>
+<h3><a name="chap1"></a>Basic Player Engagement</h3>
+<h4><a name="chap1a"></a>Stimulation</h4>
+<p>This is our first simulation and it’s pretty simple. Just click the interact! button to give the player a game piece. Different players require different amounts of engagement. If a player receives too little stimulation, they will leave.</p>
 <table><tr>
     <td><canvas id="sim1" width="480px" height="320px" align="center"></canvas></td>
     <td><button id="sim1Inter1">Interact!</button>
 </tr></table>
-<h4><a name="chap1b">On The Simplifications of the Article</a></h4>
+<h4><a name="chap1b"></a>On The Simplifications of the Article</h4>
 <p>This is an obvious and gross simplification of player retention. I can see at least the following false assumptions:<ul>
     <li><b>Players retain as long as they are engaged</b> - This just is not something that you can guarantee. Players will leave sometimes even if they are still having fun with your game. They only have so much time in a day.</li>
     <li><b>Players need a baseline of engagement</b> - I personally have stuck with games that I’ve found less than engaging for a variety of reasons. Sometimes, that’s just the right game for the moment.</li>
 </ul></p>
 <p>I’m going to add another assumption to this list, <b>a game that keeps players engaged is more likely to keep players</b>. I don’t actually have any proof of this, but it seems reasonable enough to make and lets us ignore the falsity of the previous assumptions as irrelevant. Essentially, while an individual person is likely to be a lot less predictable than the person we are simulating, optimizing for this simulated person will also optimize for your player base as a whole.</p>
 <p>Remember though that this is a simplification aimed to help you think about a single axis. A new feature could do well in this simulation, but still be bad for your game due to something that this article doesn’t cover, such as negatively impacting the decision making in the game or increasing complexity to the point of impenetrability. Video games are complex and need to be looked at with multiple lenses.</p>
-<h4><a name="chap1c">Different Things Are Differently Engaging</a></h4>
-<p>Now, let’s try the earlier simulation with a variety of things to engage the player with.</p>
-<table><tr>
-    <td><canvas id="sim1c" width="480px" height="320px" align="center"></canvas></td>
-    <td>
-      <button id="sim1cInter1">Interact!</button>
-      <br />
-      <button id="sim1cInter2">Interact!</button>
-</td></tr></table>
-<h3><a name="chap2">Systems of Engagement</a></h3>
-<p>A common game development pattern is to use a system to drive the player’s engagement instead of hand-crafting it in the manner of the above simulations. It’s often time consuming and expensive to keep clicking on a player. So, with this simulation, we’re going to go over a basic system to do that for us.</p>
+<h3><a name="chap2"></a>Basic Systems</h3>
+<p>A common game development pattern is to use a system to drive the player’s engagement instead of hand-crafting it in the manner of the above simulations. It’s often time consuming and expensive to hand-craft a full drop pattern. So, with this simulation, we’re going to go over a basic system to do that for us.</p>
+<p>There are three sliders to play with in this simulation:<ul>
+    <li><b>Pull Rate</b>: How often the player gets a new game piece.</li>
+    <li><b>Zoom</b>: Zooms into the beginning of the graph at a higher resolution</li>
+    <li><b>Novelty Requirement</b>: The player's need to get new stuff.</li>
+</ul></p>
 <table><tr>
     <td>
       <table>
@@ -57,17 +52,21 @@
       </table>
     </td>
     <td>
-      <p>Engagemement per second</p>
-      <input id="input2_eps" type="range" min="0" max="30" value="0"><span id="disp2_eps">0</span>
+      <p>Pull Rate</p>
+      <input id="input2_eps" type="range" min="0" max="50" value="0"><span id="disp2_eps">0</span>
       <p>Zoom</p>
       <input id="input2_zoom" type="range" min="1" max="5" value="1"><span id="disp2_zoom">1</span>
-      <p>Boredom Factor</p>
+      <p>Novelty Requirement</p>
       <input id="input2_bore" type="range" min="0" max="5" value="1"><span id="disp2_bore">1</span>
 </td></tr></table>
-<h3><a name="chap3">Pull Systems</a></h3>
-<h4><a name="chap3a">Simple Simulation</a></h4>
-<p>This article is actually only going to focus on one specific kind of engagement system. We’re going to look at a couple of pull algorithms, or algorithms for giving players pieces in a random or semi-random way.</p>
-<p>The impetus for this piece came from watching Pokemon Go release the second generation of Pokemon into the wild, so we’re going to use that game as the primary example for the rest of the piece. In particular, we’re going to look at the way players randomly encounter new Pokemon to catch, and consider that a pull system. We’re going to start with the most abstract representation, where we’ll just assume that all of the pieces are of equal value and we’ll assume 100 of them. We're also going to take out over-stimulation for these simulations as it only comes up with collection games where the pieces require effort from the player. We're also going to make people get bored faster so that we can see people start dropping out as they have most of the pieces.</p>
+<p>Observations:<ul>
+    <li>You can see that in this simulation, you get to an almost steady state very quickly, where the players that want more engagement than the system provides leave and the rest persist indefinitely.</li>
+</ul></p>
+<h3><a name="chap3"></a>Pull Systems</h3>
+<h4><a name="chap3a"></a>Simple Simulation</h4>
+<p>We're now going to add some detail to the previous simulation to make it skew closer to a real pull system.</p>
+<p>The impetus for this piece came from watching Pokemon Go release the second generation of Pokemon into the wild, so we’re going to use that game as the primary example for the rest of the piece. In particular, we’re going to look at the way players randomly encounter new Pokemon to catch, and consider that a pull system.</p>
+<p>We’re going to start with the most abstract representation, where we’ll just assume that all of the pieces are of equal value and we’ll assume 100 of them.</p>
 <table><tr>
     <td>
       <table>
@@ -76,11 +75,11 @@
       </table>
     </td>
     <td>
-      <p>Pulls per second</p>
-      <input id="input3_eps" type="range" min="0" max="30" value="0"><span id="disp3_eps">0</span>
+      <p>Pull Rate</p>
+      <input id="input3_eps" type="range" min="0" max="50" value="0"><span id="disp3_eps">0</span>
       <p>Zoom</p>
       <input id="input3_zoom" type="range" min="1" max="5" value="1"><span id="disp3_zoom">1</span>
-      <p>Boredom Factor</p>
+      <p>Novelty Requirement</p>
       <input id="input3_bore" type="range" min="0" max="5" value="1"><span id="disp3_bore">1</span>
       <p>Number of Pieces</p>
       <input id="input3_count" type="range" min="100" max="500" value="100" step="10"><span id="disp3_count">100</span>
@@ -92,14 +91,22 @@
       <br />
       <p>Average Number of Pulls: <span id="data3_1"></span></p>
       <p>Average Number of Unique Pieces: <span id="data3_2"></span></p>
+      <p>Average Time for Player: <span id="data3_time"></span></p>
     </td>
 </tr></table>
+<p>Observations:<ul>
+    <li>Setting the pull rate to a value equal to that in the previous graph and leaving the value of duplicate pieces to be 0 results in the graph tending to 0 as all the players get more and more pieces and so are less likely to experience that boost of getting a new piece.</li>
+    <li>If we set the value of a new item to be equal to the value of a duplicate, we can recreate the previous graph trivially.</li>
+    <li>Increasing the pull rate beyond a point when the value of duplicate pieces is still 0 results in a <i>decrease</i> in average time beyond a certain point as players quickly collect all of the pieces and then quickly leave.</li>
+    <li>Increasing the value of the duplicate pieces has a large impact on the size of the tail of the graph.</li>
+    <li>For 100 pieces and optimizing for highest average time, the players average about 77 unique pieces.</li>
+</ul></p>
 <p>We’re making a few assumptions at this point, and they are at best only partially true. These are:<ul>
     <li><b>Getting things is equivalent to being engaged</b> - This is a hard one to make definitive statements about. I think that getting things is a piece of the puzzle that is engagement, but not the full thing. Its importance changes greatly depending on the kind of game and the consequences of getting a new piece. I personally feel that players need to feel like they are getting value for their time and when a game revolves around collection, this means that they need to collect something meaningful occasionally.</li>
     <li><b>Potential value of a pull is meaningless</b> - ie; players don't care about what they can get, they care about what they did get. This is clearly false. When players have things that they are excited to get, then they are naturally more excited about the chance to get those things. However, that is a layer of complexity too far for these simulations, so the calculation of those effects are left as an exercise for the reader. However, this excitement is a major part of the player experience and you should keep it in mind when designing your own systems.</li>
-    <li><b>Pull rate is constant</b> - Again, this is just to keep this article simple. In the real world, the rate can be as complex as you want it to be.</li>
+    <li><b>Pull Rate is constant</b> - Again, this is just to keep this article simple. In the real world, the rate can be as complex as you want it to be.</li>
 </ul></p>
-<h3><a name="chap3b">Pokemon Go</a></h3>
+<h3><a name="chap3b"></a>Pokemon Go</h3>
 <p>Let’s get a little deeper into what a real pull system looks like. Taking Pokemon Go itself, different Pokemon are differently valuable due to the following axes:<ul>
     <li><b>Intrinsic Value</b> - Pokemon have value to players beyond that of simple gameplay. People who like puppies are probably going to like Growlithes no matter what the stats are.</li>
     <li><b>Not having caught it before</b> - This is a collection game and you want to Catch ‘Em All, so getting a Pokemon that you have not caught before is naturally going to be a major reward moment for most players.</li>
@@ -115,19 +122,23 @@
       </table>
     </td>
     <td>
-      <p>Pulls per second</p>
-      <input id="input3b_eps" type="range" min="0" max="30" value="0"><span id="disp3b_eps">0</span>
+      <p>Pull Rate</p>
+      <input id="input3b_eps" type="range" min="0" max="100" value="0"><span id="disp3b_eps">0</span>
       <p>Zoom</p>
       <input id="input3b_zoom" type="range" min="1" max="5" value="1"><span id="disp3b_zoom">1</span>
-      <p>Boredom Factor</p>
+      <p>Novelty Requirement</p>
       <input id="input3b_bore" type="range" min="0" max="5" value="1"><span id="disp3b_bore">1</span>
       <br />
       <br />
       <p>Average Number of Pulls: <span id="data3b_1"></span></p>
       <p>Average Number of Unique Pieces: <span id="data3b_2"></span></p>
+      <p>Average Time For Player: <span id="data3b_time"></span></p>
     </td>
 </tr></table>
-<h3><a name="chap5">Introducing New Content</a></h3>
+<p>Observations:<ul>
+    <li>Naturally, these graphs look very similar to the previous ones when the duplicate value is non-zero but less than the new value.</li>
+</ul></p>
+<h3><a name="chap5"></a>Introducing New Content</h3>
 <p>Pokemon Go, when introducing the second generation, just added more pieces to their existing pulls. Releasing like that when your players have already performed a large number of pulls results in a graph that looks something like the below one.</p>
 <table><tr>
     <td>
@@ -137,11 +148,11 @@
       </table>
     </td>
     <td>
-      <p>Pulls per second</p>
-      <input id="input5_eps" type="range" min="0" max="30" value="0"><span id="disp5_eps">0</span>
+      <p>Pull Rate</p>
+      <input id="input5_eps" type="range" min="0" max="50" value="0"><span id="disp5_eps">0</span>
       <p>Zoom</p>
       <input id="input5_zoom" type="range" min="1" max="5" value="1"><span id="disp5_zoom">1</span>
-      <p>Boredom Factor</p>
+      <p>Novelty Requirement</p>
       <input id="input5_bore" type="range" min="0" max="5" value="1"><span id="disp5_bore">1</span>
       <p>Number of Old Pieces</p>
       <input id="input5_count" type="range" min="100" max="500" value="100" step="10"><span id="disp5_count">100</span>
@@ -157,12 +168,16 @@
       <br />
       <p>Average Number of Pulls: <span id="data5_1"></span></p>
       <p>Average Number of Unique Pieces: <span id="data5_2"></span></p>
+      <p>Average Time For Player: <span id="data5_time"></span></p>
     </td>
 </tr></table>
-<p>For comparison, you can set one of the above graphs to the same parameters to see what your engagement curve would look like if you just only let people pull from the new items. Of course, this is not practical as your players want the abilty to catch them all, but it is notable how much worse the graphs for this scenario look.</p>
-<h3><a name="chap6">Various Pull Algorithms</a></h3>
+<p>Observations:<ul>
+    <li>For comparison, you can set one of the above graphs to the same parameters to see what your engagement curve would look like if you just only let people pull from the new items. Of course, this is not practical as your players want the abilty to catch them all, but it is notable how much worse the graphs for this pull algorithm look.</li>
+    <li>Making sure that your duplicate pieces hold value makes a huge difference here.</li>
+</ul></p>
+<h3><a name="chap6"></a>Various Pull Algorithms</h3>
 <p>We've only worked with simple, highly random pull algorithms thus far. In this section, we'll take a look at some other kinds.</p>
-<h4><a name="chap6a">Deterministic</a></h4>
+<h4><a name="chap6a"></a>Deterministic</h4>
 <p>What does this graph look like in the trivial case of just going through every element one by one?</p>
 <table><tr>
     <td>
@@ -172,11 +187,11 @@
       </table>
     </td>
     <td>
-      <p>Pulls per second</p>
-      <input id="input6a_eps" type="range" min="0" max="30" value="0"><span id="disp6a_eps">0</span>
+      <p>Pull Rate</p>
+      <input id="input6a_eps" type="range" min="0" max="50" value="0"><span id="disp6a_eps">0</span>
       <p>Zoom</p>
       <input id="input6a_zoom" type="range" min="1" max="5" value="1"><span id="disp6a_zoom">1</span>
-      <p>Boredom Factor</p>
+      <p>Novelty Requirement</p>
       <input id="input6a_bore" type="range" min="0" max="5" value="1"><span id="disp6a_bore">1</span>
       <p>Number of Pieces</p>
       <input id="input6a_count" type="range" min="100" max="500" value="100" step="10"><span id="disp6a_count">100</span>
@@ -188,10 +203,14 @@
       <br />
       <p>Average Number of Pulls: <span id="data6a_1"></span></p>
       <p>Average Number of Unique Pieces: <span id="data6a_2"></span></p>
+      <p>Average Time For Player: <span id="data6a_time"></span></p>
     </td>
 </tr></table>
-<p>This simulation is the clearest way to demonstrate the failings of these simulations. It <i>feels</i> very different for players to get random pulls and to get deterministic pulls. One reason for this is that being able to calculate the effort required for something changes the way players value that thing. These simulations have no way to model that though. They can only show you what players get.</p>
-<h3><a name="chap6b">Placing a Ceiling on Bad Pulls</a></h3>
+<p>Note that it <i>feels</i> very different for players to get random pulls and to get deterministic pulls. One reason for this is that being able to calculate the effort required for something changes the way players value that thing. These simulations have no way to model that though. They can only show you what players get.</p>
+<p>Observations:<ul>
+    <li>The optimal pull rate is much lower here than for the simple simulation. It also results in a lower average time.</li>
+</ul></p>
+<h3><a name="chap6b"></a>Placing a Ceiling on Bad Pulls</h3>
 <p>A common approach to smooth out the variance of a pull system is to place a ceiling on the number of low-value pulls. That results in graphs that look like this:</p>
 <table><tr>
     <td>
@@ -201,11 +220,11 @@
       </table>
     </td>
     <td>
-      <p>Pulls per second</p>
-      <input id="input6b_eps" type="range" min="0" max="30" value="0"><span id="disp6b_eps">0</span>
+      <p>Pull Rate</p>
+      <input id="input6b_eps" type="range" min="0" max="50" value="0"><span id="disp6b_eps">0</span>
       <p>Zoom</p>
       <input id="input6b_zoom" type="range" min="1" max="5" value="1"><span id="disp6b_zoom">1</span>
-      <p>Boredom Factor</p>
+      <p>Novelty Requirement</p>
       <input id="input6b_bore" type="range" min="0" max="5" value="1"><span id="disp6b_bore">1</span>
       <p>Number of Pieces</p>
       <input id="input6b_count" type="range" min="100" max="500" value="100" step="10"><span id="disp6b_count">100</span>
@@ -219,10 +238,18 @@
       <br />
       <p>Average Number of Pulls: <span id="data6b_1"></span></p>
       <p>Average Number of Unique Pieces: <span id="data6b_2"></span></p>
+      <p>Average Time For Player: <span id="data6b_time"></span></p>
     </td>
 </tr></table>
+<p>Observations:<ul>
+    <li>The graph drops off much more sharply here.</li>
+    <li>It's very easy to param such that all players get all of the items.</li>
+    <li>The optimal average time is very close to that of the simple simulation, but the variance is much smaller. All of the players have a very similar experience, which leads to them getting all of the pieces and then leaving.</li>
+    <li>So, while all of the players come very close to the average mark, there are no players that spend much more time than the average.</li>
+    <li>The optimal pull rate here is lower than that of the simple simulation.</li>
+</ul></p>
 <p>On a personal note, I dislike it when games do this without communicating the skew to the player because I feel it reinforces the gambler’s fallacy. I also feel that making the cap more explicit is a better experience for the player as the player doesn’t feel like bad pulls help them get to good pulls when it is implicit.</p>
-<h3><a name="chap6c">Pokemon Red and Blue</a></h3>
+<h3><a name="chap6c"></a>Pokemon Red and Blue</h3>
 <p>Another option is to divide your pool of pulls across a lot of smaller pools and then let the player move between them. This is essentially what <i>Pokemon Red</i> did and also what a game like <i>Heroes Charge</i> does as well. This changes the flow to be much wavier, and so the graph looks more like this:</p>
 <table><tr>
     <td>
@@ -232,11 +259,11 @@
       </table>
     </td>
     <td>
-      <p>Pulls per second</p>
-      <input id="input6c_eps" type="range" min="0" max="30" value="0"><span id="disp6c_eps">0</span>
+      <p>Pull Rate</p>
+      <input id="input6c_eps" type="range" min="0" max="50" value="0"><span id="disp6c_eps">0</span>
       <p>Zoom</p>
       <input id="input6c_zoom" type="range" min="1" max="5" value="1"><span id="disp6c_zoom">1</span>
-      <p>Boredom Factor</p>
+      <p>Novelty Requirement</p>
       <input id="input6c_bore" type="range" min="0" max="5" value="1"><span id="disp6c_bore">1</span>
       <p>Number of Old Pieces</p>
       <input id="input6c_count" type="range" min="100" max="500" value="100" step="10"><span id="disp6c_count">100</span>
@@ -252,10 +279,16 @@
       <br />
       <p>Average Number of Pulls: <span id="data6c_1"></span></p>
       <p>Average Number of Unique Pieces: <span id="data6c_2"></span></p>
+      <p>Average Time For Player: <span id="data6c_time"></span></p>
     </td>
 </tr></table>
 <p>Of course, there are a lot of ways to implement a division like this and the amount of effort required is dependent on the kind of separation that you want to make.</p>
-<h3><a name="conclusion">Conclusion</a></h3>
+<p>Observations:<ul>
+    <li>The optimal average time here is much higher than in any of the other simulations.</li>
+    <li>The optimal pull rate is lower than in any of the others, but only slightly below the cap.</li>
+    <li>Once again, the player ends up with all of the pieces here in the optimal scenario.</li>
+</ul></p>
+<h3><a name="conclusion"></a>Conclusion</h3>
 <p>This is, of course, a very incomplete taxonomy. Hopefully though, it lets you think about how players interact with the pull systems that you have made and the potential problems and benefits of these solutions.</p>
 <p>You can look through the source code here - <a href="https://github.com/nikwin/pullArticle">https://github.com/nikwin/pullArticle</a></p>
 <p>If you have any feedback on this or if you want to see more things like this, you can reach me on Twitter at <a href="https://twitter.com/murthynikhil">@murthynikhil</a>. If you make any new simulations like this, please do tell me. I’d love to see more explanations like this.</p>
