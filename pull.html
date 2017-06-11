@@ -26,22 +26,17 @@
 <h3><a name="chap1"></a>Basic Player Engagement</h3>
 <h4><a name="chap1a"></a>Stimulation</h4>
 <p>This is our first simulation and it’s pretty simple. Just click the interact! button to give the player a game piece. Different players require different amounts of engagement. If a player receives too little stimulation, they will leave.</p>
+<p>This is a really deep abstraction of how getting stuff in games works. Nevertheless, you can imagine that if this were Pokemon Go, every time you pressed the interact button, the player got a new Pokemon.</p>
 <table><tr>
     <td><canvas id="sim1" width="480px" height="320px" align="center"></canvas></td>
     <td><button id="sim1Inter1">Interact!</button>
 </tr></table>
 <h4><a name="chap1b"></a>On The Simplifications of the Article</h4>
-<p>This is an obvious and gross simplification of player retention. I can see at least the following false assumptions:<ul>
-    <li><b>Players retain as long as they are engaged</b> - This just is not something that you can guarantee. Players will leave sometimes even if they are still having fun with your game. They only have so much time in a day.</li>
-    <li><b>Players need a baseline of engagement</b> - I personally have stuck with games that I’ve found less than engaging for a variety of reasons. Sometimes, that’s just the right game for the moment.</li>
-</ul></p>
-<p>I’m going to add another assumption to this list, <b>a game that keeps players engaged is more likely to keep players</b>. I don’t actually have any proof of this, but it seems reasonable enough to make and lets us ignore the falsity of the previous assumptions as irrelevant. Essentially, while an individual person is likely to be a lot less predictable than the person we are simulating, optimizing for this simulated person will also optimize for your player base as a whole.</p>
-<p>Remember though that this is a simplification aimed to help you think about a single axis. A new feature could do well in this simulation, but still be bad for your game due to something that this article doesn’t cover, such as negatively impacting the decision making in the game or increasing complexity to the point of impenetrability. Video games are complex and need to be looked at with multiple lenses.</p>
+<p>This is an obvious and gross simplification of the player's experience. However, if we look at it as purely the experience on the single axis of the pull system, and a heavy simplification of that as well, we can still derive value from these simulations. However, it is worth remembering that a new feature could do well in this simulation, but still be bad for your game due to something that this article doesn’t cover, such as negatively impacting the decision making in the game or increasing complexity to the point of impenetrability. Video games are complex and need to be looked at with multiple lenses.</p>
 <h3><a name="chap2"></a>Basic Systems</h3>
 <p>A common game development pattern is to use a system to drive the player’s engagement instead of hand-crafting it in the manner of the above simulations. It’s often time consuming and expensive to hand-craft a full drop pattern. So, with this simulation, we’re going to go over a basic system to do that for us.</p>
 <p>There are three sliders to play with in this simulation:<ul>
     <li><b>Pull Rate</b>: How often the player gets a new game piece.</li>
-    <li><b>Zoom</b>: Zooms into the beginning of the graph at a higher resolution</li>
     <li><b>Novelty Requirement</b>: The player's need to get new stuff.</li>
 </ul></p>
 <table><tr>
@@ -54,8 +49,6 @@
     <td>
       <p>Pull Rate</p>
       <input id="input2_eps" type="range" min="0" max="50" value="0"><span id="disp2_eps">0</span>
-      <p>Zoom</p>
-      <input id="input2_zoom" type="range" min="1" max="5" value="1"><span id="disp2_zoom">1</span>
       <p>Novelty Requirement</p>
       <input id="input2_bore" type="range" min="0" max="5" value="1"><span id="disp2_bore">1</span>
 </td></tr></table>
@@ -77,8 +70,6 @@
     <td>
       <p>Pull Rate</p>
       <input id="input3_eps" type="range" min="0" max="50" value="0"><span id="disp3_eps">0</span>
-      <p>Zoom</p>
-      <input id="input3_zoom" type="range" min="1" max="5" value="1"><span id="disp3_zoom">1</span>
       <p>Novelty Requirement</p>
       <input id="input3_bore" type="range" min="0" max="5" value="1"><span id="disp3_bore">1</span>
       <p>Number of Pieces</p>
@@ -101,10 +92,9 @@
     <li>Increasing the value of the duplicate pieces has a large impact on the size of the tail of the graph.</li>
     <li>For 100 pieces and optimizing for highest average time, the players average about 77 unique pieces.</li>
 </ul></p>
-<p>We’re making a few assumptions at this point, and they are at best only partially true. These are:<ul>
-    <li><b>Getting things is equivalent to being engaged</b> - This is a hard one to make definitive statements about. I think that getting things is a piece of the puzzle that is engagement, but not the full thing. Its importance changes greatly depending on the kind of game and the consequences of getting a new piece. I personally feel that players need to feel like they are getting value for their time and when a game revolves around collection, this means that they need to collect something meaningful occasionally.</li>
-    <li><b>Potential value of a pull is meaningless</b> - ie; players don't care about what they can get, they care about what they did get. This is clearly false. When players have things that they are excited to get, then they are naturally more excited about the chance to get those things. However, that is a layer of complexity too far for these simulations, so the calculation of those effects are left as an exercise for the reader. However, this excitement is a major part of the player experience and you should keep it in mind when designing your own systems.</li>
-    <li><b>Pull Rate is constant</b> - Again, this is just to keep this article simple. In the real world, the rate can be as complex as you want it to be.</li>
+<p>Possible Improvements:<ul>
+    <li><b>Calculating the potential value of a pull</b> - When players have things that they are excited to get, then they are naturally more excited about the chance to get those things. However, that is a layer of complexity too far for these simulations, so the calculation of those effects are left as an exercise for the reader. However, this excitement is a major part of the player experience and you should keep it in mind when designing your own systems.</li>
+    <li><b>Uneven pull rates</b> - In the real world, the pull rate can be as complex as you want it to be. Here, I left it as a steady stream just to keep the simulations simple.</li>
 </ul></p>
 <h3><a name="chap3b"></a>Pokemon Go</h3>
 <p>Let’s get a little deeper into what a real pull system looks like. Taking Pokemon Go itself, different Pokemon are differently valuable due to the following axes:<ul>
@@ -113,7 +103,10 @@
     <li><b>Evolution</b> - This is similar to the previous one, if of lower intensity. Being able to convert a piece into one that you have yet to get is valuable to players.</li>
     <li><b>Combat value</b> - Getting a Pokemon that is stronger than the ones you already have or that is able to power up a major member of your team is valuable to players.</li>
 </ul></p>
-<p>We're not going to simulate all of that, just something a little closer to it than the simulation above. Note, that at this level of abstraction, this data can represent a lot of games, not just Pokemon Go.</p>
+<p>We're not going to simulate all of that, just something a little closer to it than the simulation above. Note, that at this level of abstraction, this data can represent a lot of games, not just Pokemon Go. To do this, I:<ul>
+    <li>Gave all of the cards a rarity tier and gave them a new and old value based off that with some random noise.</li>
+    <li>Set the number of pieces to 150.</li>
+</ul></p>
 <table><tr>
     <td>
       <table>
@@ -124,8 +117,6 @@
     <td>
       <p>Pull Rate</p>
       <input id="input3b_eps" type="range" min="0" max="100" value="0"><span id="disp3b_eps">0</span>
-      <p>Zoom</p>
-      <input id="input3b_zoom" type="range" min="1" max="5" value="1"><span id="disp3b_zoom">1</span>
       <p>Novelty Requirement</p>
       <input id="input3b_bore" type="range" min="0" max="5" value="1"><span id="disp3b_bore">1</span>
       <br />
@@ -150,8 +141,6 @@
     <td>
       <p>Pull Rate</p>
       <input id="input5_eps" type="range" min="0" max="50" value="0"><span id="disp5_eps">0</span>
-      <p>Zoom</p>
-      <input id="input5_zoom" type="range" min="1" max="5" value="1"><span id="disp5_zoom">1</span>
       <p>Novelty Requirement</p>
       <input id="input5_bore" type="range" min="0" max="5" value="1"><span id="disp5_bore">1</span>
       <p>Number of Old Pieces</p>
@@ -189,8 +178,6 @@
     <td>
       <p>Pull Rate</p>
       <input id="input6a_eps" type="range" min="0" max="50" value="0"><span id="disp6a_eps">0</span>
-      <p>Zoom</p>
-      <input id="input6a_zoom" type="range" min="1" max="5" value="1"><span id="disp6a_zoom">1</span>
       <p>Novelty Requirement</p>
       <input id="input6a_bore" type="range" min="0" max="5" value="1"><span id="disp6a_bore">1</span>
       <p>Number of Pieces</p>
@@ -222,8 +209,6 @@
     <td>
       <p>Pull Rate</p>
       <input id="input6b_eps" type="range" min="0" max="50" value="0"><span id="disp6b_eps">0</span>
-      <p>Zoom</p>
-      <input id="input6b_zoom" type="range" min="1" max="5" value="1"><span id="disp6b_zoom">1</span>
       <p>Novelty Requirement</p>
       <input id="input6b_bore" type="range" min="0" max="5" value="1"><span id="disp6b_bore">1</span>
       <p>Number of Pieces</p>
@@ -261,8 +246,6 @@
     <td>
       <p>Pull Rate</p>
       <input id="input6c_eps" type="range" min="0" max="50" value="0"><span id="disp6c_eps">0</span>
-      <p>Zoom</p>
-      <input id="input6c_zoom" type="range" min="1" max="5" value="1"><span id="disp6c_zoom">1</span>
       <p>Novelty Requirement</p>
       <input id="input6c_bore" type="range" min="0" max="5" value="1"><span id="disp6c_bore">1</span>
       <p>Number of Old Pieces</p>
