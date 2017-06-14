@@ -253,16 +253,20 @@ Sim2.prototype.draw = function(){
     this.graphCtx.beginPath();
     var startPos = [5, (height - 5) * (1 - this.dataPoints[0])];
     this.graphCtx.moveTo(startPos[0], startPos[1]);
+    var lastPos;
     for (var i = 1; i < this.dataPoints.length - 5; i++){
-        var pos = [i * this.graphZoom + 5, (height - 5) * (1 - this.dataPoints[i])];
+        var pos = [i * this.graphZoom + 5, 20 + (height - 25) * (1 - this.dataPoints[i])];
         this.graphCtx.moveTo(pos[0], height - 5);
         this.graphCtx.lineTo(pos[0], pos[1]);
+        lastPos = pos;
     }
     this.graphCtx.stroke();
     
     this.graphCtx.fillStyle = '#000000';
-    this.graphCtx.fillText('x axis - time', width - 125, 20);
-    this.graphCtx.fillText('y axis - players left', width - 125, 40);
+    this.graphCtx.fillText('x axis - time', width - 200, 15);
+    this.graphCtx.fillText('y axis - players left', width - 125, 15);
+
+    this.graphCtx.fillText('' + Math.floor(this.dataPoints[this.dataPoints.length - 1] * 100) + '%', pos[0] - 35, pos[1] - 5);
 };
 
 Sim2.prototype.initialize = function(){

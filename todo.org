@@ -1,0 +1,5 @@
+* Work
+  - [ ] Put in a thing to pause the simulations until they are clicked. 0/1T
+  - [ ] Do a comparison graph.
+  - [ ] Make the people into a bell curve
+

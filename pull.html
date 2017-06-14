@@ -26,13 +26,13 @@
 <h3><a name="chap1"></a>Basic Player Engagement</h3>
 <h4><a name="chap1a"></a>Stimulation</h4>
 <p>This is our first simulation and it’s pretty simple. Just click the interact! button to give the player a game piece. Different players require different amounts of engagement. If a player receives too little stimulation, they will leave.</p>
-<p>This is a really deep abstraction of how getting stuff in games works. Nevertheless, you can imagine that if this were Pokemon Go, every time you pressed the interact button, the player got a new Pokemon.</p>
+<p>This is a really abstract representation of how getting stuff in games works. Nevertheless, you can imagine that if this were <i>Pokemon Go</i>, every time you pressed the interact button, the player got a new Pokemon.</p>
 <table><tr>
     <td><canvas id="sim1" width="480px" height="320px" align="center"></canvas></td>
     <td><button id="sim1Inter1">Interact!</button>
 </tr></table>
 <h4><a name="chap1b"></a>On The Simplifications of the Article</h4>
-<p>This is an obvious and gross simplification of the player's experience. However, if we look at it as purely the experience on the single axis of the pull system, and a heavy simplification of that as well, we can still derive value from these simulations. However, it is worth remembering that a new feature could do well in this simulation, but still be bad for your game due to something that this article doesn’t cover, such as negatively impacting the decision making in the game or increasing complexity to the point of impenetrability. Video games are complex and need to be looked at with multiple lenses.</p>
+<p>This is an obvious and gross simplification of the player's experience. However, if we look at it as purely the experience on the single axis of the pull system, and a heavy simplification of that as well, we can still derive value from these simulations. It is also worth remembering that a new feature could do well in this simulation, but still be bad for your game due to something that this article doesn’t cover, such as negatively impacting the decision making in the game or increasing complexity to the point of impenetrability. Video games are complex and need to be looked at with multiple lenses.</p>
 <h3><a name="chap2"></a>Basic Systems</h3>
 <p>A common game development pattern is to use a system to drive the player’s engagement instead of hand-crafting it in the manner of the above simulations. It’s often time consuming and expensive to hand-craft a full drop pattern. So, with this simulation, we’re going to go over a basic system to do that for us.</p>
 <p>There are three sliders to play with in this simulation:<ul>
@@ -58,7 +58,7 @@
 <h3><a name="chap3"></a>Pull Systems</h3>
 <h4><a name="chap3a"></a>Simple Simulation</h4>
 <p>We're now going to add some detail to the previous simulation to make it skew closer to a real pull system.</p>
-<p>The impetus for this piece came from watching Pokemon Go release the second generation of Pokemon into the wild, so we’re going to use that game as the primary example for the rest of the piece. In particular, we’re going to look at the way players randomly encounter new Pokemon to catch, and consider that a pull system.</p>
+<p>The impetus for this piece came from watching <i>Pokemon Go</i> release the second generation of Pokemon into the wild, so we’re going to use that game as the primary example for the rest of the piece. In particular, we’re going to look at the way players randomly encounter new Pokemon to catch, and consider that a pull system.</p>
 <p>We’re going to start with the most abstract representation, where we’ll just assume that all of the pieces are of equal value and we’ll assume 100 of them.</p>
 <table><tr>
     <td>
@@ -86,7 +86,7 @@
     </td>
 </tr></table>
 <p>Observations:<ul>
-    <li>Setting the pull rate to a value equal to that in the previous graph and leaving the value of duplicate pieces to be 0 results in the graph tending to 0 as all the players get more and more pieces and so are less likely to experience that boost of getting a new piece.</li>
+    <li>Setting the pull rate to a value equal to that in the previous graph and leaving the value of duplicate pieces at 0 results in the graph tending to 0 as all the players get more and more pieces and so are less likely to experience that boost of getting a new piece.</li>
     <li>If we set the value of a new item to be equal to the value of a duplicate, we can recreate the previous graph trivially.</li>
     <li>Increasing the pull rate beyond a point when the value of duplicate pieces is still 0 results in a <i>decrease</i> in average time beyond a certain point as players quickly collect all of the pieces and then quickly leave.</li>
     <li>Increasing the value of the duplicate pieces has a large impact on the size of the tail of the graph.</li>
@@ -97,13 +97,13 @@
     <li><b>Uneven pull rates</b> - In the real world, the pull rate can be as complex as you want it to be. Here, I left it as a steady stream just to keep the simulations simple.</li>
 </ul></p>
 <h3><a name="chap3b"></a>Pokemon Go</h3>
-<p>Let’s get a little deeper into what a real pull system looks like. Taking Pokemon Go itself, different Pokemon are differently valuable due to the following axes:<ul>
+<p>Let’s get a little deeper into what a real pull system looks like. Taking <i>Pokemon Go</i> itself, different Pokemon are differently valuable due to the following axes:<ul>
     <li><b>Intrinsic Value</b> - Pokemon have value to players beyond that of simple gameplay. People who like puppies are probably going to like Growlithes no matter what the stats are.</li>
     <li><b>Not having caught it before</b> - This is a collection game and you want to Catch ‘Em All, so getting a Pokemon that you have not caught before is naturally going to be a major reward moment for most players.</li>
     <li><b>Evolution</b> - This is similar to the previous one, if of lower intensity. Being able to convert a piece into one that you have yet to get is valuable to players.</li>
     <li><b>Combat value</b> - Getting a Pokemon that is stronger than the ones you already have or that is able to power up a major member of your team is valuable to players.</li>
 </ul></p>
-<p>We're not going to simulate all of that, just something a little closer to it than the simulation above. Note, that at this level of abstraction, this data can represent a lot of games, not just Pokemon Go. To do this, I:<ul>
+<p>We're not going to simulate all of that, just something a little closer to it than the simulation above. Note, that at this level of abstraction, this data can represent a lot of games, not just <i>Pokemon Go</i>. To do this, I:<ul>
     <li>Gave all of the cards a rarity tier and gave them a new and old value based off that with some random noise.</li>
     <li>Set the number of pieces to 150.</li>
 </ul></p>
@@ -130,7 +130,7 @@
     <li>Naturally, these graphs look very similar to the previous ones when the duplicate value is non-zero but less than the new value.</li>
 </ul></p>
 <h3><a name="chap5"></a>Introducing New Content</h3>
-<p>Pokemon Go, when introducing the second generation, just added more pieces to their existing pulls. Releasing like that when your players have already performed a large number of pulls results in a graph that looks something like the below one.</p>
+<p><i>Pokemon Go</i>, when introducing the second generation, just added more pieces to their existing pulls. Releasing like that when your players have already performed a large number of pulls results in a graph that looks something like the below one.</p>
 <table><tr>
     <td>
       <table>
@@ -196,6 +196,7 @@
 <p>Note that it <i>feels</i> very different for players to get random pulls and to get deterministic pulls. One reason for this is that being able to calculate the effort required for something changes the way players value that thing. These simulations have no way to model that though. They can only show you what players get.</p>
 <p>Observations:<ul>
     <li>The optimal pull rate is much lower here than for the simple simulation. It also results in a lower average time.</li>
+    <li>It's very easy to get all of the pieces to all of the players.</li>
 </ul></p>
 <h3><a name="chap6b"></a>Placing a Ceiling on Bad Pulls</h3>
 <p>A common approach to smooth out the variance of a pull system is to place a ceiling on the number of low-value pulls. That results in graphs that look like this:</p>
