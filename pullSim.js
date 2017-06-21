@@ -15,7 +15,7 @@ var PersonRenderer = function(){
     this.rect = [(width - PERSON_WIDTH) / 2, 
                  (height - PERSON_HEIGHT) / 2, 
                  PERSON_WIDTH, PERSON_HEIGHT];
-    this.imageKey = 'person' + Math.floor(Math.random() * 3);
+    this.imageKey = 'person0';
 };
 
 PersonRenderer.prototype.draw = function(ctx, yOffset){
